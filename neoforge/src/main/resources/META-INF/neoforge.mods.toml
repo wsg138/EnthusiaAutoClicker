@@ -1,0 +1,24 @@
+license="All-Rights-Reserved"
+
+[[mods]]
+modId="enthusia_autoclicker"
+version="${version}"
+displayName="Enthusia AutoClicker"
+authors="P2wn"
+description='''
+A rate-limited client auto-clicker designed for use on Enthusia.
+'''
+
+[[dependencies.enthusia_autoclicker]]
+modId="neoforge"
+type="required"
+versionRange="[${neoforge_version},)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.enthusia_autoclicker]]
+modId="minecraft"
+type="required"
+versionRange="[${minecraft_version}]"
+ordering="NONE"
+side="CLIENT"

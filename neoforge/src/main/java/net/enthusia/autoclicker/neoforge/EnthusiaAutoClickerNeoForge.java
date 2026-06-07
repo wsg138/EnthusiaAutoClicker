@@ -1,0 +1,59 @@
+package net.enthusia.autoclicker.neoforge;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import java.nio.file.Path;
+import net.enthusia.autoclicker.AutoclickerConfig;
+import net.enthusia.autoclicker.client.AutoclickerRuntime;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import org.lwjgl.glfw.GLFW;
+
+@Mod(value = EnthusiaAutoClickerNeoForge.MOD_ID, dist = Dist.CLIENT)
+@EventBusSubscriber(modid = EnthusiaAutoClickerNeoForge.MOD_ID, value = Dist.CLIENT)
+public final class EnthusiaAutoClickerNeoForge {
+    public static final String MOD_ID = "enthusia_autoclicker";
+    private static final KeyMapping.Category CATEGORY = new KeyMapping.Category(
+        Identifier.fromNamespaceAndPath(MOD_ID, "main")
+    );
+    private static final KeyMapping TOGGLE_KEY = new KeyMapping(
+        "key.enthusia_autoclicker.toggle",
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_UNKNOWN,
+        CATEGORY
+    );
+    private static final KeyMapping SETTINGS_KEY = new KeyMapping(
+        "key.enthusia_autoclicker.settings",
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_O,
+        CATEGORY
+    );
+    private static AutoclickerRuntime runtime;
+
+    public EnthusiaAutoClickerNeoForge(ModContainer container) {
+        Path configPath = FMLPaths.CONFIGDIR.get().resolve("enthusia-autoclicker.properties");
+        runtime = new AutoclickerRuntime(AutoclickerConfig.load(configPath), TOGGLE_KEY, SETTINGS_KEY);
+    }
+
+    @SubscribeEvent
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.registerCategory(CATEGORY);
+        event.register(TOGGLE_KEY);
+        event.register(SETTINGS_KEY);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (runtime != null) {
+            runtime.tick(Minecraft.getInstance());
+        }
+    }
+}

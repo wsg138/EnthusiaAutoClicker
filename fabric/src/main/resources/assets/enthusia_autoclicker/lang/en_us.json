@@ -1,0 +1,15 @@
+{
+  "key.category.enthusia_autoclicker.main": "Enthusia AutoClicker",
+  "key.enthusia_autoclicker.toggle": "Start/Stop",
+  "key.enthusia_autoclicker.settings": "Open Settings",
+  "screen.enthusia_autoclicker.title": "Enthusia AutoClicker Settings",
+  "screen.enthusia_autoclicker.left_mode": "Left mouse action",
+  "screen.enthusia_autoclicker.right_mode": "Right mouse action",
+  "screen.enthusia_autoclicker.left_interval": "Left click interval",
+  "screen.enthusia_autoclicker.right_interval": "Right click interval",
+  "screen.enthusia_autoclicker.run_duration": "Stop after",
+  "screen.enthusia_autoclicker.hint": "Durations: 20t, 1000ms, 2s. Use off for no timer.",
+  "mode.enthusia_autoclicker.off": "Off",
+  "mode.enthusia_autoclicker.click": "Click",
+  "mode.enthusia_autoclicker.hold": "Hold"
+}

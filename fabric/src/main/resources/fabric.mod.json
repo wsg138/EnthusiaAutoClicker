@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "enthusia_autoclicker",
+  "version": "${version}",
+  "name": "Enthusia AutoClicker",
+  "description": "A rate-limited client auto-clicker designed for use on Enthusia.",
+  "authors": [
+    "P2wn"
+  ],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.enthusia.autoclicker.fabric.EnthusiaAutoClickerFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": "~${minecraft_version}",
+    "fabric-api": "*",
+    "java": ">=21"
+  }
+}

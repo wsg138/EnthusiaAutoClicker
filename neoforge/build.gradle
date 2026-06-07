@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev'
+}
+
+base {
+    archivesName = 'enthusia-autoclicker-neoforge'
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_version}"
+}
+
+sourceSets.main.java.srcDirs(
+    '../common/src/main/java',
+    '../shared-client/src/main/java'
+)
+
+runs {
+    configureEach {
+        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        modSource project.sourceSets.main
+    }
+
+    client {
+    }
+}
+
+processResources {
+    inputs.properties(
+        version: mod_version,
+        minecraft_version: minecraft_version,
+        neoforge_version: neoforge_version
+    )
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(
+            version: mod_version,
+            minecraft_version: minecraft_version,
+            neoforge_version: neoforge_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+    options.compilerArgs.add('-Xlint:deprecation')
+}

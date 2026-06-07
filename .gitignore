@@ -1,0 +1,9 @@
+.gradle/
+build/
+run/
+**/build/
+**/run/
+.idea/
+*.iml
+*.log
+crash-reports/
