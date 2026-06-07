@@ -1,0 +1,1 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/911597eafadd41af9838a9e4cdf7393a)](https://app.codacy.com/gh/wsg138/EnthusiaAutoClicker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
