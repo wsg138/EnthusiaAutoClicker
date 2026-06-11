@@ -5,6 +5,7 @@ modId="enthusia_autoclicker"
 version="${version}"
 displayName="Enthusia AutoClicker"
 authors="P2wn"
+logoFile="enthusia_autoclicker.png"
 description='''
 A rate-limited client auto-clicker designed for use on Enthusia.
 '''

@@ -3,10 +3,14 @@ package net.enthusia.autoclicker.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.AutoclickerEngine;
+import net.enthusia.autoclicker.DurationParser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 public final class AutoclickerRuntime {
@@ -16,6 +20,7 @@ public final class AutoclickerRuntime {
     private final KeyMapping settingsKey;
     private boolean leftApplied;
     private boolean rightApplied;
+    private long nextFoodAttemptMillis;
 
     public AutoclickerRuntime(
         AutoclickerConfig config,
@@ -51,9 +56,12 @@ public final class AutoclickerRuntime {
             && client.gameMode != null
             && client.screen == null;
         boolean usingItem = client.player != null && client.player.isUsingItem();
-        AutoclickerEngine.TickDecision decision = engine.decide(config, now(), safe, usingItem);
+        boolean foodActive = safe && shouldEatOffhand(client);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, now(), safe, usingItem, foodActive);
 
-        if (decision.clickRight()) {
+        if (decision.holdFood()) {
+            startOrContinueEating(client);
+        } else if (decision.clickRight()) {
             KeyMapping.click(boundKey(client.options.keyUse));
         }
         if (decision.clickLeft()) {
@@ -103,8 +111,43 @@ public final class AutoclickerRuntime {
         return System.nanoTime() / 1_000_000L;
     }
 
-    private static void showStatus(Minecraft client, String status) {
-        if (client.player != null) {
+    private boolean shouldEatOffhand(Minecraft client) {
+        if (!config.leftEnabled() || !config.foodEnabled() || client.player == null) {
+            return false;
+        }
+
+        ItemStack offhand = client.player.getOffhandItem();
+        var food = offhand.get(DataComponents.FOOD);
+        boolean offhandFood = food != null && offhand.has(DataComponents.CONSUMABLE);
+        if (!offhandFood) {
+            return false;
+        }
+
+        if (client.player.isUsingItem()) {
+            return client.player.getUsedItemHand() == InteractionHand.OFF_HAND;
+        }
+        return client.player.getFoodData().getFoodLevel() <= config.foodLevelThreshold()
+            && client.player.canEat(food.canAlwaysEat())
+            && !client.player.getCooldowns().isOnCooldown(offhand);
+    }
+
+    private void startOrContinueEating(Minecraft client) {
+        if (client.player == null || client.gameMode == null) {
+            return;
+        }
+        long nowMillis = now();
+        if (!client.player.isUsingItem() && nowMillis >= nextFoodAttemptMillis) {
+            nextFoodAttemptMillis = nowMillis + DurationParser.MINIMUM_CLICK_INTERVAL_MILLIS;
+            client.gameMode.useItem(client.player, InteractionHand.OFF_HAND);
+        }
+        if (client.player.isUsingItem() && client.player.getUsedItemHand() == InteractionHand.OFF_HAND) {
+            client.options.keyUse.setDown(true);
+            rightApplied = true;
+        }
+    }
+
+    private void showStatus(Minecraft client, String status) {
+        if (config.statusMessages() && client.player != null) {
             client.player.displayClientMessage(
                 Component.literal("[Enthusia AutoClicker] ").withStyle(ChatFormatting.AQUA)
                     .append(Component.literal(status).withStyle(ChatFormatting.GRAY)),

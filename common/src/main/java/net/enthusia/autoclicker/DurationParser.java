@@ -24,6 +24,25 @@ public final class DurationParser {
         return parseMillis(normalized);
     }
 
+    public static long parseIntervalTicks(String value) {
+        long millis = parseTicks(value, false);
+        if (millis < MINIMUM_CLICK_INTERVAL_MILLIS) {
+            throw new IllegalArgumentException("Click intervals must be at least 20 ticks.");
+        }
+        return millis;
+    }
+
+    public static long parseOptionalDurationTicks(String value) {
+        return parseTicks(value, true);
+    }
+
+    public static String formatTicks(long millis) {
+        if (millis == 0L) {
+            return "0";
+        }
+        return Long.toString(Math.ceilDiv(millis, 50L));
+    }
+
     public static long parseMillis(String value) {
         String normalized = value.trim().toLowerCase(Locale.ROOT);
         if (normalized.isEmpty()) {
@@ -64,5 +83,24 @@ public final class DurationParser {
             return (millis / 50L) + "t";
         }
         return millis + "ms";
+    }
+
+    private static long parseTicks(String value, boolean allowZero) {
+        String normalized = value.trim();
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("Enter a whole number of ticks.");
+        }
+        try {
+            long ticks = Long.parseLong(normalized);
+            if (ticks == 0L && allowZero) {
+                return 0L;
+            }
+            if (ticks <= 0L) {
+                throw new IllegalArgumentException("Ticks must be greater than zero.");
+            }
+            return Math.multiplyExact(ticks, 50L);
+        } catch (NumberFormatException | ArithmeticException exception) {
+            throw new IllegalArgumentException("Ticks must be a whole number.", exception);
+        }
     }
 }

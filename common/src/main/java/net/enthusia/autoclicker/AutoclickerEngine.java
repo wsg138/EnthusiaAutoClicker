@@ -35,29 +35,44 @@ public final class AutoclickerEngine {
         return false;
     }
 
-    public TickDecision decide(AutoclickerConfig config, long nowMillis, boolean safe, boolean usingItem) {
+    public TickDecision decide(
+        AutoclickerConfig config,
+        long nowMillis,
+        boolean safe,
+        boolean usingItem,
+        boolean foodActive
+    ) {
         if (!enabled || !safe) {
             rightHoldActive = false;
             return TickDecision.NONE;
         }
+        if (foodActive) {
+            rightHoldActive = false;
+            return TickDecision.FOOD;
+        }
 
-        boolean holdRight = config.rightMode() == ActionMode.HOLD;
-        boolean clickRight = isDue(config.rightMode(), nowMillis, nextRightClickMillis);
+        boolean holdRight = config.rightEnabled() && config.rightMode() == ActionMode.HOLD;
+        boolean clickRight = config.rightEnabled()
+            && isDue(config.rightMode(), nowMillis, nextRightClickMillis);
         if (clickRight) {
             nextRightClickMillis = nowMillis + config.rightIntervalMillis();
         }
 
         boolean rightStartsThisTick = (holdRight && !rightHoldActive) || clickRight;
         rightHoldActive = holdRight;
-        boolean holdLeft = config.leftMode() == ActionMode.HOLD && !usingItem && !rightStartsThisTick;
-        boolean clickLeft = !usingItem
+        boolean holdLeft = config.leftEnabled()
+            && config.leftMode() == ActionMode.HOLD
+            && !usingItem
+            && !rightStartsThisTick;
+        boolean clickLeft = config.leftEnabled()
+            && !usingItem
             && !rightStartsThisTick
             && isDue(config.leftMode(), nowMillis, nextLeftClickMillis);
         if (clickLeft) {
             nextLeftClickMillis = nowMillis + config.leftIntervalMillis();
         }
 
-        return new TickDecision(holdLeft, clickLeft, holdRight, clickRight);
+        return new TickDecision(holdLeft, clickLeft, holdRight, clickRight, false);
     }
 
     public boolean isEnabled() {
@@ -72,8 +87,10 @@ public final class AutoclickerEngine {
         boolean holdLeft,
         boolean clickLeft,
         boolean holdRight,
-        boolean clickRight
+        boolean clickRight,
+        boolean holdFood
     ) {
-        public static final TickDecision NONE = new TickDecision(false, false, false, false);
+        public static final TickDecision NONE = new TickDecision(false, false, false, false, false);
+        public static final TickDecision FOOD = new TickDecision(false, false, false, false, true);
     }
 }

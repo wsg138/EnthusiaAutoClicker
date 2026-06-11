@@ -18,4 +18,12 @@ class DurationParserTest {
         assertThrows(IllegalArgumentException.class, () -> DurationParser.parseIntervalMillis("19t"));
         assertThrows(IllegalArgumentException.class, () -> DurationParser.parseIntervalMillis("999ms"));
     }
+
+    @Test
+    void parsesAndFormatsTickOnlyFields() {
+        assertEquals(1_000L, DurationParser.parseIntervalTicks("20"));
+        assertEquals(0L, DurationParser.parseOptionalDurationTicks("0"));
+        assertEquals("25", DurationParser.formatTicks(1_250L));
+        assertThrows(IllegalArgumentException.class, () -> DurationParser.parseIntervalTicks("19"));
+    }
 }

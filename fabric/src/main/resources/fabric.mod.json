@@ -8,6 +8,7 @@
     "P2wn"
   ],
   "license": "All-Rights-Reserved",
+  "icon": "assets/enthusia_autoclicker/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [

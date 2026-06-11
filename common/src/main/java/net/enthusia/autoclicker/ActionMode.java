@@ -1,7 +1,6 @@
 package net.enthusia.autoclicker;
 
 public enum ActionMode {
-    OFF,
     CLICK,
     HOLD;
 
