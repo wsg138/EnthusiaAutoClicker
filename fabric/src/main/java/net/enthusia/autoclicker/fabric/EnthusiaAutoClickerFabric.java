@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -18,6 +19,7 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
         Identifier.fromNamespaceAndPath("enthusia_autoclicker", "main")
     );
 
+    private static AutoclickerConfig config;
     private AutoclickerRuntime runtime;
 
     @Override
@@ -36,8 +38,17 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
         ));
 
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
-        runtime = new AutoclickerRuntime(AutoclickerConfig.load(configPath), toggleKey, settingsKey);
+        config = AutoclickerConfig.load(configPath);
+        runtime = new AutoclickerRuntime(config, toggleKey, settingsKey);
         ClientTickEvents.END_CLIENT_TICK.register(runtime::tick);
         ClientLifecycleEvents.CLIENT_STOPPING.register(runtime::stop);
+    }
+
+    public static Screen createConfigScreen(Screen parent) {
+        if (config == null) {
+            Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
+            config = AutoclickerConfig.load(configPath);
+        }
+        return new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(config, parent);
     }
 }

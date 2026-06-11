@@ -9,11 +9,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 public final class AutoclickerSettingsScreen extends Screen {
     private static final int FIELD_WIDTH = 140;
 
     private final AutoclickerConfig config;
+    private final @Nullable Screen parent;
     private ActionMode draftLeftMode;
     private ActionMode draftRightMode;
     private EditBox leftInterval;
@@ -23,9 +25,10 @@ public final class AutoclickerSettingsScreen extends Screen {
     private Button rightMode;
     private Component validationMessage = Component.empty();
 
-    public AutoclickerSettingsScreen(AutoclickerConfig config) {
+    public AutoclickerSettingsScreen(AutoclickerConfig config, @Nullable Screen parent) {
         super(Component.translatable("screen.enthusia_autoclicker.title"));
         this.config = config;
+        this.parent = parent;
         this.draftLeftMode = config.leftMode();
         this.draftRightMode = config.rightMode();
     }
@@ -83,7 +86,6 @@ public final class AutoclickerSettingsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
 
         int labelLeft = width / 2 - 155;
@@ -101,6 +103,11 @@ public final class AutoclickerSettingsScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 
     private void saveAndClose() {

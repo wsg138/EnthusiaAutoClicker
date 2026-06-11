@@ -1,11 +1,13 @@
 package net.enthusia.autoclicker.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.AutoclickerEngine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public final class AutoclickerRuntime {
     private final AutoclickerConfig config;
@@ -35,7 +37,7 @@ public final class AutoclickerRuntime {
 
         while (settingsKey.consumeClick()) {
             if (client.screen == null) {
-                client.setScreen(new AutoclickerSettingsScreen(config));
+                client.setScreen(new AutoclickerSettingsScreen(config, null));
             }
         }
 
@@ -51,13 +53,17 @@ public final class AutoclickerRuntime {
         boolean usingItem = client.player != null && client.player.isUsingItem();
         AutoclickerEngine.TickDecision decision = engine.decide(config, now(), safe, usingItem);
 
-        boolean applyRight = decision.holdRight() || decision.clickRight();
-        boolean applyLeft = decision.holdLeft() || decision.clickLeft();
-        if (applyRight) {
+        if (decision.clickRight()) {
+            KeyMapping.click(boundKey(client.options.keyUse));
+        }
+        if (decision.clickLeft()) {
+            KeyMapping.click(boundKey(client.options.keyAttack));
+        }
+        if (decision.holdRight()) {
             client.options.keyUse.setDown(true);
             rightApplied = true;
         }
-        if (applyLeft) {
+        if (decision.holdLeft()) {
             client.options.keyAttack.setDown(true);
             leftApplied = true;
         }
@@ -70,13 +76,27 @@ public final class AutoclickerRuntime {
 
     private void releaseAppliedKeys(Minecraft client) {
         if (leftApplied) {
-            client.options.keyAttack.setDown(false);
+            restorePhysicalState(client, client.options.keyAttack);
             leftApplied = false;
         }
         if (rightApplied) {
-            client.options.keyUse.setDown(false);
+            restorePhysicalState(client, client.options.keyUse);
             rightApplied = false;
         }
+    }
+
+    private static void restorePhysicalState(Minecraft client, KeyMapping mapping) {
+        InputConstants.Key key = boundKey(mapping);
+        boolean physicallyDown = switch (key.getType()) {
+            case MOUSE -> GLFW.glfwGetMouseButton(client.getWindow().handle(), key.getValue()) == GLFW.GLFW_PRESS;
+            case KEYSYM -> InputConstants.isKeyDown(client.getWindow(), key.getValue());
+            case SCANCODE -> false;
+        };
+        mapping.setDown(physicallyDown);
+    }
+
+    private static InputConstants.Key boundKey(KeyMapping mapping) {
+        return InputConstants.getKey(mapping.saveString());
     }
 
     private static long now() {

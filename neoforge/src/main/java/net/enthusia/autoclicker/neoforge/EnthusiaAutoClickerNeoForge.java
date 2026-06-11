@@ -15,6 +15,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.lwjgl.glfw.GLFW;
 
 @Mod(value = EnthusiaAutoClickerNeoForge.MOD_ID, dist = Dist.CLIENT)
@@ -40,7 +41,12 @@ public final class EnthusiaAutoClickerNeoForge {
 
     public EnthusiaAutoClickerNeoForge(ModContainer container) {
         Path configPath = FMLPaths.CONFIGDIR.get().resolve("enthusia-autoclicker.properties");
-        runtime = new AutoclickerRuntime(AutoclickerConfig.load(configPath), TOGGLE_KEY, SETTINGS_KEY);
+        AutoclickerConfig config = AutoclickerConfig.load(configPath);
+        runtime = new AutoclickerRuntime(config, TOGGLE_KEY, SETTINGS_KEY);
+        container.registerExtensionPoint(
+            IConfigScreenFactory.class,
+            (ignored, parent) -> new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(config, parent)
+        );
     }
 
     @SubscribeEvent

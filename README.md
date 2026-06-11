@@ -18,7 +18,7 @@ compatible with current NeoForge.
 
 1. Install the Fabric or NeoForge JAR matching the client.
 2. Open Minecraft's Controls screen and assign the **Start/Stop** key.
-3. Press `O` by default to open the settings screen.
+3. Press `O` by default to open the settings screen. Fabric users can also open it from Mod Menu.
 4. Set left and right mouse actions independently:
    - **Off**: no automated input.
    - **Click**: press the normal Minecraft key mapping at the configured interval.
@@ -32,6 +32,7 @@ Click intervals cannot be configured below 20 ticks (1000 milliseconds).
 
 - All automated input pauses while any screen or GUI is open.
 - Synthetic held inputs are released when paused or disabled.
+- One-shot clicks are queued through Minecraft's normal key mapping click path.
 - Left-click input is suppressed while the player is actively using an item.
 - A newly started right-click hold or right click takes priority over left click for that tick.
 - No direct movement, interaction, attack, or custom protocol packets are created.
@@ -52,8 +53,8 @@ Java 21 is required.
 
 Output JARs:
 
-- `fabric/build/libs/enthusia-autoclicker-fabric-1.0.0.jar`
-- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.0.0.jar`
+- `fabric/build/libs/enthusia-autoclicker-fabric-1.0.1.jar`
+- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.0.1.jar`
 
 ## Configuration
 

@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = 'net.enthusia.autoclicker'
-    version = '1.0.0'
+    version = mod_version
 }
 
 tasks.named('build') {
