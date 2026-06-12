@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 public final class AutoclickerConfig {
-    private static final int CONFIG_VERSION = 2;
+    private static final int CONFIG_VERSION = 3;
 
     public static final boolean DEFAULT_LEFT_ENABLED = true;
     public static final boolean DEFAULT_RIGHT_ENABLED = false;
@@ -22,6 +22,12 @@ public final class AutoclickerConfig {
     public static final long DEFAULT_RIGHT_INTERVAL_MILLIS = 1_000L;
     public static final long DEFAULT_RUN_DURATION_MILLIS = 0L;
     public static final int DEFAULT_FOOD_LEVEL_THRESHOLD = 18;
+    public static final boolean DEFAULT_DURABILITY_GUARD = false;
+    public static final int DEFAULT_MINIMUM_DURABILITY = 10;
+    public static final boolean DEFAULT_ARMOR_STAND_EATING = false;
+    public static final boolean DEFAULT_AUTO_RESTOCK = false;
+    public static final int DEFAULT_RESTOCK_AT_COUNT = 4;
+    public static final boolean DEFAULT_STOP_WHEN_OUT_OF_FOOD = false;
 
     private final Path path;
     private boolean leftEnabled = DEFAULT_LEFT_ENABLED;
@@ -34,6 +40,12 @@ public final class AutoclickerConfig {
     private long rightIntervalMillis = DEFAULT_RIGHT_INTERVAL_MILLIS;
     private long runDurationMillis = DEFAULT_RUN_DURATION_MILLIS;
     private int foodLevelThreshold = DEFAULT_FOOD_LEVEL_THRESHOLD;
+    private boolean durabilityGuard = DEFAULT_DURABILITY_GUARD;
+    private int minimumDurability = DEFAULT_MINIMUM_DURABILITY;
+    private boolean armorStandEating = DEFAULT_ARMOR_STAND_EATING;
+    private boolean autoRestock = DEFAULT_AUTO_RESTOCK;
+    private int restockAtCount = DEFAULT_RESTOCK_AT_COUNT;
+    private boolean stopWhenOutOfFood = DEFAULT_STOP_WHEN_OUT_OF_FOOD;
 
     private AutoclickerConfig(Path path) {
         this.path = path;
@@ -82,6 +94,30 @@ public final class AutoclickerConfig {
                 properties.getProperty("food-level-threshold"),
                 config.foodLevelThreshold
             );
+            config.durabilityGuard = parseBoolean(
+                properties.getProperty("durability-guard"),
+                config.durabilityGuard
+            );
+            config.minimumDurability = parseMinimumDurability(
+                properties.getProperty("minimum-durability"),
+                config.minimumDurability
+            );
+            config.armorStandEating = parseBoolean(
+                properties.getProperty("armor-stand-eating"),
+                config.armorStandEating
+            );
+            config.autoRestock = parseBoolean(
+                properties.getProperty("auto-restock"),
+                config.autoRestock
+            );
+            config.restockAtCount = parseRestockCount(
+                properties.getProperty("restock-at-count"),
+                config.restockAtCount
+            );
+            config.stopWhenOutOfFood = parseBoolean(
+                properties.getProperty("stop-when-out-of-food"),
+                config.stopWhenOutOfFood
+            );
         } catch (IOException | IllegalArgumentException exception) {
             System.err.println("[Enthusia AutoClicker] Could not read config; using safe defaults: "
                 + exception.getMessage());
@@ -102,6 +138,12 @@ public final class AutoclickerConfig {
         properties.setProperty("right-interval-ms", Long.toString(rightIntervalMillis));
         properties.setProperty("run-duration-ms", Long.toString(runDurationMillis));
         properties.setProperty("food-level-threshold", Integer.toString(foodLevelThreshold));
+        properties.setProperty("durability-guard", Boolean.toString(durabilityGuard));
+        properties.setProperty("minimum-durability", Integer.toString(minimumDurability));
+        properties.setProperty("armor-stand-eating", Boolean.toString(armorStandEating));
+        properties.setProperty("auto-restock", Boolean.toString(autoRestock));
+        properties.setProperty("restock-at-count", Integer.toString(restockAtCount));
+        properties.setProperty("stop-when-out-of-food", Boolean.toString(stopWhenOutOfFood));
 
         Path parent = path.getParent();
         Path temporary = path.resolveSibling(path.getFileName() + ".tmp");
@@ -176,6 +218,54 @@ public final class AutoclickerConfig {
 
     public void setFoodLevelThreshold(int foodLevelThreshold) {
         this.foodLevelThreshold = requireFoodLevel(foodLevelThreshold);
+    }
+
+    public boolean durabilityGuard() {
+        return durabilityGuard;
+    }
+
+    public void setDurabilityGuard(boolean durabilityGuard) {
+        this.durabilityGuard = durabilityGuard;
+    }
+
+    public int minimumDurability() {
+        return minimumDurability;
+    }
+
+    public void setMinimumDurability(int minimumDurability) {
+        this.minimumDurability = requireMinimumDurability(minimumDurability);
+    }
+
+    public boolean armorStandEating() {
+        return armorStandEating;
+    }
+
+    public void setArmorStandEating(boolean armorStandEating) {
+        this.armorStandEating = armorStandEating;
+    }
+
+    public boolean autoRestock() {
+        return autoRestock;
+    }
+
+    public void setAutoRestock(boolean autoRestock) {
+        this.autoRestock = autoRestock;
+    }
+
+    public int restockAtCount() {
+        return restockAtCount;
+    }
+
+    public void setRestockAtCount(int restockAtCount) {
+        this.restockAtCount = requireRestockCount(restockAtCount);
+    }
+
+    public boolean stopWhenOutOfFood() {
+        return stopWhenOutOfFood;
+    }
+
+    public void setStopWhenOutOfFood(boolean stopWhenOutOfFood) {
+        this.stopWhenOutOfFood = stopWhenOutOfFood;
     }
 
     public long leftIntervalMillis() {
@@ -257,5 +347,27 @@ public final class AutoclickerConfig {
             throw new IllegalArgumentException("Food level threshold must be between 1 and 19.");
         }
         return foodLevel;
+    }
+
+    private static int parseMinimumDurability(String value, int fallback) {
+        return value == null ? fallback : requireMinimumDurability(Integer.parseInt(value));
+    }
+
+    private static int requireMinimumDurability(int durability) {
+        if (durability < 1 || durability > 10_000) {
+            throw new IllegalArgumentException("Minimum durability must be between 1 and 10000.");
+        }
+        return durability;
+    }
+
+    private static int parseRestockCount(String value, int fallback) {
+        return value == null ? fallback : requireRestockCount(Integer.parseInt(value));
+    }
+
+    private static int requireRestockCount(int count) {
+        if (count < 0 || count > 63) {
+            throw new IllegalArgumentException("Restock count must be between 0 and 63.");
+        }
+        return count;
     }
 }

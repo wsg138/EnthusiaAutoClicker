@@ -16,11 +16,13 @@ import org.lwjgl.glfw.GLFW;
 public final class AutoclickerRuntime {
     private final AutoclickerConfig config;
     private final AutoclickerEngine engine = new AutoclickerEngine();
+    private final AutoclickerExtrasRuntime extras;
     private final KeyMapping toggleKey;
     private final KeyMapping settingsKey;
     private boolean leftApplied;
     private boolean rightApplied;
     private long nextFoodAttemptMillis;
+    private long continuousUseStartedMillis;
 
     public AutoclickerRuntime(
         AutoclickerConfig config,
@@ -28,6 +30,7 @@ public final class AutoclickerRuntime {
         KeyMapping settingsKey
     ) {
         this.config = config;
+        this.extras = new AutoclickerExtrasRuntime(config);
         this.toggleKey = toggleKey;
         this.settingsKey = settingsKey;
     }
@@ -46,18 +49,36 @@ public final class AutoclickerRuntime {
             }
         }
 
-        if (engine.updateTimer(now())) {
+        long nowMillis = now();
+        if (engine.updateTimer(nowMillis)) {
             showStatus(client, "Timed run complete");
             return;
         }
 
-        boolean safe = client.player != null
+        boolean inWorld = client.player != null
             && client.level != null
-            && client.gameMode != null
-            && client.screen == null;
+            && client.gameMode != null;
+        if (!inWorld && engine.isEnabled()) {
+            engine.setEnabled(false, config, nowMillis);
+            continuousUseStartedMillis = 0L;
+            return;
+        }
+
+        boolean safe = inWorld && client.screen == null;
+        updateContinuousUseTimer(safe, nowMillis);
+        if (safe && engine.isEnabled()) {
+            AutoclickerExtrasRuntime.TickResult extrasResult = extras.tick(client, nowMillis);
+            if (extrasResult.stopReason() != null) {
+                engine.setEnabled(false, config, nowMillis);
+                showStatus(client, extrasResult.stopReason());
+            }
+            if (extrasResult.pauseTick()) {
+                return;
+            }
+        }
         boolean usingItem = client.player != null && client.player.isUsingItem();
-        boolean foodActive = safe && shouldEatOffhand(client);
-        AutoclickerEngine.TickDecision decision = engine.decide(config, now(), safe, usingItem, foodActive);
+        boolean foodActive = safe && shouldEatOffhand(client, nowMillis);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, nowMillis, safe, usingItem, foodActive);
 
         if (decision.holdFood()) {
             startOrContinueEating(client);
@@ -111,7 +132,7 @@ public final class AutoclickerRuntime {
         return System.nanoTime() / 1_000_000L;
     }
 
-    private boolean shouldEatOffhand(Minecraft client) {
+    private boolean shouldEatOffhand(Minecraft client, long nowMillis) {
         if (!config.leftEnabled() || !config.foodEnabled() || client.player == null) {
             return false;
         }
@@ -126,9 +147,16 @@ public final class AutoclickerRuntime {
         if (client.player.isUsingItem()) {
             return client.player.getUsedItemHand() == InteractionHand.OFF_HAND;
         }
-        return client.player.getFoodData().getFoodLevel() <= config.foodLevelThreshold()
+        boolean readyToEat = client.player.getFoodData().getFoodLevel() <= config.foodLevelThreshold()
             && client.player.canEat(food.canAlwaysEat())
             && !client.player.getCooldowns().isOnCooldown(offhand);
+        if (!readyToEat) {
+            return false;
+        }
+        long continuousUseMillis = continuousUseStartedMillis == 0L
+            ? 0L
+            : nowMillis - continuousUseStartedMillis;
+        return extras.canEatThroughTarget(client, continuousUseMillis);
     }
 
     private void startOrContinueEating(Minecraft client) {
@@ -155,4 +183,13 @@ public final class AutoclickerRuntime {
             );
         }
     }
+
+    private void updateContinuousUseTimer(boolean safe, long nowMillis) {
+        if (!engine.isEnabled() || !safe) {
+            continuousUseStartedMillis = 0L;
+        } else if (continuousUseStartedMillis == 0L) {
+            continuousUseStartedMillis = nowMillis;
+        }
+    }
+
 }

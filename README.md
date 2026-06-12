@@ -25,6 +25,13 @@ compatible with current NeoForge.
 7. Optionally enable **Eat offhand food** under the left clicker. When the configured
    hunger threshold is reached, left clicking pauses while food in the offhand is eaten.
 
+The **Extras** tab includes:
+
+- A durability guard that disables the entire autoclicker before the main-hand item breaks.
+- Optional armor-stand eating after 60 seconds of continuous autoclicker use.
+- Automatic offhand food restocking from the player inventory.
+- An optional shutdown when hungry and no usable offhand food remains.
+
 Click intervals cannot be configured below 20 ticks (1000 milliseconds).
 
 ## Safety Behavior
@@ -35,6 +42,10 @@ Click intervals cannot be configured below 20 ticks (1000 milliseconds).
 - Left-click input is suppressed while the player is actively using an item.
 - Offhand food mode pauses both clickers while vanilla completes the eating action.
 - Food mode only uses items marked as both food and consumable in the offhand.
+- Armor-stand eating never changes entity hitboxes and cannot activate during the first minute.
+- Restocking uses Minecraft's player-inventory click handler and never replaces a non-food offhand item.
+- Inventory scans are limited to once per second while the relevant automation is enabled.
+- The autoclicker disables on world exit, and GUI time does not count toward the armor-stand delay.
 - A newly started right-click hold or right click takes priority over left click for that tick.
 - The mod does not construct packet objects or send custom protocol messages.
 - The mod does not run without a loaded player, level, and client game mode.
@@ -54,8 +65,8 @@ Java 21 is required.
 
 Output JARs:
 
-- `fabric/build/libs/enthusia-autoclicker-fabric-1.1.0.jar`
-- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.1.0.jar`
+- `fabric/build/libs/enthusia-autoclicker-fabric-1.2.0.jar`
+- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.2.0.jar`
 
 ## Configuration
 
