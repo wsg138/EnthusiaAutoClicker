@@ -22,9 +22,9 @@
     "fabricloader": ">=0.19.2",
     "minecraft": "~${minecraft_version}",
     "fabric-api": "*",
-    "java": ">=21"
+    "java": ">=${java_version}"
   },
   "suggests": {
-    "modmenu": ">=17.0.0"
+    "modmenu": ">=${modmenu_version}"
   }
 }

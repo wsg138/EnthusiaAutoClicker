@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle'
+}
+
+base {
+    archivesName = "enthusia-autoclicker-forge-${minecraft_version}"
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+        }
+
+        register('client')
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${forge_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
+}
+
+sourceSets.main.java.srcDirs(
+    '../common/src/main/java',
+    '../shared-client/src/main/java'
+)
+
+processResources {
+    inputs.properties(
+        version: mod_version,
+        minecraft_version: minecraft_version,
+        forge_version: forge_version
+    )
+    filesMatching('META-INF/mods.toml') {
+        expand(
+            version: mod_version,
+            minecraft_version: minecraft_version,
+            forge_version: forge_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}

@@ -3,7 +3,7 @@ plugins {
 }
 
 base {
-    archivesName = 'enthusia-autoclicker-fabric'
+    archivesName = "enthusia-autoclicker-fabric-${minecraft_version}"
 }
 
 repositories {
@@ -27,10 +27,14 @@ sourceSets.main.java.srcDirs(
 processResources {
     inputs.property 'version', mod_version
     inputs.property 'minecraft_version', minecraft_version
+    inputs.property 'java_version', 21
+    inputs.property 'modmenu_version', modmenu_version
     filesMatching('fabric.mod.json') {
         expand(
             version: mod_version,
-            minecraft_version: minecraft_version
+            minecraft_version: minecraft_version,
+            java_version: 21,
+            modmenu_version: modmenu_version
         )
     }
 }

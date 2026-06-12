@@ -1,0 +1,46 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+base {
+    archivesName = "enthusia-autoclicker-fabric-${latest_minecraft_version}"
+}
+
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${latest_minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${latest_fabric_api_version}"
+    compileOnly "com.terraformersmc:modmenu:${latest_modmenu_version}"
+}
+
+sourceSets.main.java.srcDir('../common/src/main/java')
+sourceSets.main.resources.srcDirs('../fabric/src/main/resources')
+
+processResources {
+    inputs.property 'version', mod_version
+    inputs.property 'minecraft_version', latest_minecraft_version
+    inputs.property 'java_version', 25
+    inputs.property 'modmenu_version', latest_modmenu_version
+    filesMatching('fabric.mod.json') {
+        expand(
+            version: mod_version,
+            minecraft_version: latest_minecraft_version,
+            java_version: 25,
+            modmenu_version: latest_modmenu_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}

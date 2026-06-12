@@ -6,17 +6,27 @@ constructing packet objects itself.
 
 ## Supported Builds
 
-| Minecraft | Fabric | NeoForge | Forge |
-|---|---:|---:|---:|
-| 1.21.11 | Yes | Yes | No |
+| Minecraft | Fabric | Quilt | Forge | NeoForge | Java |
+|---|---:|---:|---:|---:|---:|
+| 1.21.11 | Yes | Fabric JAR | Yes | Yes | 21 |
+| 26.1.2 | Yes | Fabric JAR | No | No | 25 |
 
-Modern Minecraft releases are supported through Fabric and NeoForge. Legacy Forge releases
-should be maintained as separate version modules because their client and input APIs are not
-compatible with current NeoForge.
+The 26.1.2 Fabric metadata also accepts later compatible 26.1.x hotfixes. It intentionally
+does not claim compatibility with 26.2 because Minecraft client APIs can change between game
+drops.
+
+Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
+Quilt-only build would duplicate the same code without improving compatibility.
+
+Minecraft 1.19 through 1.21.10 are not yet published by this repository. Supporting that range
+requires separate source adapters and builds for incompatible Minecraft API bands; widening a
+loader version range would only allow incompatible clients to launch and crash. Releases should
+therefore use one JAR per Minecraft compatibility band and loader, not one universal JAR.
 
 ## Usage
 
-1. Install the Fabric or NeoForge JAR matching the client.
+1. Install the Fabric, Forge, or NeoForge JAR matching the client. Quilt users install the
+   matching Fabric JAR.
 2. Open Minecraft's Controls screen and assign the **Start/Stop** key.
 3. Press `O` by default to open the settings screen. Fabric users can also open it from Mod Menu.
 4. Enable the left and right autoclickers independently.
@@ -28,7 +38,7 @@ compatible with current NeoForge.
 The **Extras** tab includes:
 
 - A durability guard that disables the entire autoclicker before the main-hand item breaks.
-- Optional armor-stand eating after 60 seconds of continuous autoclicker use.
+- Optional armor-stand eating after 10 seconds of continuous autoclicker use.
 - Automatic offhand food restocking from the player inventory.
 - An optional shutdown when hungry and no usable offhand food remains.
 
@@ -43,8 +53,8 @@ Click intervals cannot be configured below 20 ticks (1000 milliseconds).
 - All automated mouse actions pause while the crosshair targets another player.
 - Offhand food mode pauses both clickers while vanilla completes the eating action.
 - Food mode only uses items marked as both food and consumable in the offhand.
-- Armor-stand eating never changes entity hitboxes and cannot activate during the first minute.
-- Restocking uses Minecraft's player-inventory click handler and never replaces a non-food offhand item.
+- Armor-stand eating never changes entity hitboxes and cannot activate during the first 10 seconds.
+- Restocking uses Minecraft's player-inventory click handler, merges matching stackable food, and never replaces a non-food offhand item.
 - Inventory scans are limited to once per second while the relevant automation is enabled.
 - The autoclicker disables on world exit, and GUI time does not count toward the armor-stand delay.
 - A newly started right-click hold or right click takes priority over left click for that tick.
@@ -58,7 +68,8 @@ separate server-side integration with the chosen anti-cheat.
 
 ## Build
 
-Java 21 is required.
+Java 25 is required to run the complete multi-version build. The 1.21.11 artifacts target
+Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 ```powershell
 .\gradlew.bat build
@@ -66,8 +77,10 @@ Java 21 is required.
 
 Output JARs:
 
-- `fabric/build/libs/enthusia-autoclicker-fabric-1.2.1.jar`
-- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.2.1.jar`
+- `fabric/build/libs/enthusia-autoclicker-fabric-1.21.11-1.3.0.jar`
+- `fabric-26.1/build/libs/enthusia-autoclicker-fabric-26.1.2-1.3.0.jar`
+- `forge/build/libs/enthusia-autoclicker-forge-1.21.11-1.3.0.jar`
+- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.21.11-1.3.0.jar`
 
 ## Configuration
 

@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
@@ -128,13 +128,13 @@ final class AutoclickerExtrasRuntime {
         ItemStack source = client.player.getInventory().getItem(inventorySlot);
         ItemStack offhand = client.player.getOffhandItem();
         if (!offhand.isEmpty() && ItemStack.isSameItemSameComponents(source, offhand)) {
-            clickInventorySlot(client, menuSlot, 0, ClickType.PICKUP);
-            clickInventorySlot(client, InventoryMenu.SHIELD_SLOT, 0, ClickType.PICKUP);
-            clickInventorySlot(client, menuSlot, 0, ClickType.PICKUP);
+            clickInventorySlot(client, menuSlot, 0, ContainerInput.PICKUP);
+            clickInventorySlot(client, InventoryMenu.SHIELD_SLOT, 0, ContainerInput.PICKUP);
+            clickInventorySlot(client, menuSlot, 0, ContainerInput.PICKUP);
             return true;
         }
 
-        clickInventorySlot(client, menuSlot, Inventory.SLOT_OFFHAND, ClickType.SWAP);
+        clickInventorySlot(client, menuSlot, Inventory.SLOT_OFFHAND, ContainerInput.SWAP);
         return true;
     }
 
@@ -142,13 +142,13 @@ final class AutoclickerExtrasRuntime {
         Minecraft client,
         int menuSlot,
         int button,
-        ClickType clickType
+        ContainerInput input
     ) {
-        client.gameMode.handleInventoryMouseClick(
+        client.gameMode.handleContainerInput(
             InventoryMenu.CONTAINER_ID,
             menuSlot,
             button,
-            clickType,
+            input,
             client.player
         );
     }
