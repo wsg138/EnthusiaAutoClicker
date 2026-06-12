@@ -1,0 +1,19 @@
+plugins {
+    id 'base'
+    id 'fabric-loom' version '1.6.12' apply false
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)' apply false
+    id 'net.neoforged.gradle.userdev' version '7.0.156' apply false
+}
+
+allprojects {
+    group = 'net.enthusia.autoclicker'
+    version = mod_version
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+tasks.named('build') {
+    dependsOn ':common:test', ':fabric:build', ':forge:build', ':neoforge:build'
+}

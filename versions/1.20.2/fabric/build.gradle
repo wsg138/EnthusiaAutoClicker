@@ -1,0 +1,54 @@
+plugins {
+    id 'fabric-loom'
+}
+
+base {
+    archivesName = "EnthusiaAutoClicker-${minecraft_version}-Fabric"
+}
+
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+    modCompileOnly "com.terraformersmc:modmenu:${modmenu_version}"
+    modLocalRuntime "com.terraformersmc:modmenu:${modmenu_version}"
+}
+
+sourceSets.main.java.srcDirs(
+    '../common/src/main/java',
+    '../shared-client/src/main/java'
+)
+
+processResources {
+    inputs.property 'version', mod_version
+    inputs.property 'minecraft_version', minecraft_version
+    inputs.property 'java_version', 17
+    inputs.property 'modmenu_version', modmenu_version
+    filesMatching('fabric.mod.json') {
+        expand(
+            version: mod_version,
+            minecraft_version: minecraft_version,
+            java_version: 17,
+            modmenu_version: modmenu_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = ''
+}
