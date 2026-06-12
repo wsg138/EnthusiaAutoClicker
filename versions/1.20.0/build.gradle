@@ -1,0 +1,17 @@
+plugins {
+    id 'base'
+    id 'fabric-loom' version '1.6.12' apply false
+}
+
+allprojects {
+    group = 'net.enthusia.autoclicker'
+    version = mod_version
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+tasks.named('build') {
+    dependsOn ':common:test', ':fabric:build'
+}
