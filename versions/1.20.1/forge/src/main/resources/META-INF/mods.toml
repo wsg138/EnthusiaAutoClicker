@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All-Rights-Reserved"
+clientSideOnly=true
+
+[[mods]]
+modId="enthusia_autoclicker"
+version="${version}"
+displayName="Enthusia AutoClicker"
+authors="P2wn"
+logoFile="enthusia_autoclicker.png"
+description='''
+A rate-limited client auto-clicker designed for use on Enthusia.
+'''
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.enthusia_autoclicker]]
+modId="forge"
+mandatory=true
+versionRange="[47.3.0,)"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.enthusia_autoclicker]]
+modId="minecraft"
+mandatory=true
+versionRange="[${minecraft_version}]"
+ordering="NONE"
+side="CLIENT"
