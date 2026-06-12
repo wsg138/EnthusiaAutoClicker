@@ -40,9 +40,14 @@ public final class AutoclickerEngine {
         long nowMillis,
         boolean safe,
         boolean usingItem,
-        boolean foodActive
+        boolean foodActive,
+        boolean automationBlocked
     ) {
         if (!enabled || !safe) {
+            rightHoldActive = false;
+            return TickDecision.NONE;
+        }
+        if (automationBlocked) {
             rightHoldActive = false;
             return TickDecision.NONE;
         }

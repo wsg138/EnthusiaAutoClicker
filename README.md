@@ -40,6 +40,7 @@ Click intervals cannot be configured below 20 ticks (1000 milliseconds).
 - Synthetic held inputs are released when paused or disabled.
 - One-shot clicks are queued through Minecraft's normal key mapping click path.
 - Left-click input is suppressed while the player is actively using an item.
+- All automated mouse actions pause while the crosshair targets another player.
 - Offhand food mode pauses both clickers while vanilla completes the eating action.
 - Food mode only uses items marked as both food and consumable in the offhand.
 - Armor-stand eating never changes entity hitboxes and cannot activate during the first minute.
@@ -65,8 +66,8 @@ Java 21 is required.
 
 Output JARs:
 
-- `fabric/build/libs/enthusia-autoclicker-fabric-1.2.0.jar`
-- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.2.0.jar`
+- `fabric/build/libs/enthusia-autoclicker-fabric-1.2.1.jar`
+- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.2.1.jar`
 
 ## Configuration
 

@@ -40,6 +40,7 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
         config = AutoclickerConfig.load(configPath);
         runtime = new AutoclickerRuntime(config, toggleKey, settingsKey);
+        ClientTickEvents.START_CLIENT_TICK.register(runtime::preTick);
         ClientTickEvents.END_CLIENT_TICK.register(runtime::tick);
         ClientLifecycleEvents.CLIENT_STOPPING.register(runtime::stop);
     }

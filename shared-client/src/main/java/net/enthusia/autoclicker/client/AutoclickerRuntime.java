@@ -10,7 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.EntityHitResult;
 import org.lwjgl.glfw.GLFW;
 
 public final class AutoclickerRuntime {
@@ -78,7 +80,15 @@ public final class AutoclickerRuntime {
         }
         boolean usingItem = client.player != null && client.player.isUsingItem();
         boolean foodActive = safe && shouldEatOffhand(client, nowMillis);
-        AutoclickerEngine.TickDecision decision = engine.decide(config, nowMillis, safe, usingItem, foodActive);
+        boolean playerTargeted = safe && isTargetingPlayer(client);
+        AutoclickerEngine.TickDecision decision = engine.decide(
+            config,
+            nowMillis,
+            safe,
+            usingItem,
+            foodActive,
+            playerTargeted
+        );
 
         if (decision.holdFood()) {
             startOrContinueEating(client);
@@ -101,6 +111,24 @@ public final class AutoclickerRuntime {
     public void stop(Minecraft client) {
         engine.setEnabled(false, config, now());
         releaseAppliedKeys(client);
+    }
+
+    public void preTick(Minecraft client) {
+        if (!engine.isEnabled() || !isTargetingPlayer(client)) {
+            return;
+        }
+        if (leftApplied) {
+            client.options.keyAttack.setDown(false);
+        }
+        if (rightApplied) {
+            client.options.keyUse.setDown(false);
+        }
+        while (client.options.keyAttack.consumeClick()) {
+            // Remove queued automated input before vanilla handles the player target.
+        }
+        while (client.options.keyUse.consumeClick()) {
+            // Remove queued automated input before vanilla handles the player target.
+        }
     }
 
     private void releaseAppliedKeys(Minecraft client) {
@@ -190,6 +218,11 @@ public final class AutoclickerRuntime {
         } else if (continuousUseStartedMillis == 0L) {
             continuousUseStartedMillis = nowMillis;
         }
+    }
+
+    private static boolean isTargetingPlayer(Minecraft client) {
+        return client.hitResult instanceof EntityHitResult entityHit
+            && entityHit.getEntity() instanceof Player;
     }
 
 }

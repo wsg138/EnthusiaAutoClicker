@@ -57,6 +57,13 @@ public final class EnthusiaAutoClickerNeoForge {
     }
 
     @SubscribeEvent
+    public static void onClientPreTick(ClientTickEvent.Pre event) {
+        if (runtime != null) {
+            runtime.preTick(Minecraft.getInstance());
+        }
+    }
+
+    @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         if (runtime != null) {
             runtime.tick(Minecraft.getInstance());

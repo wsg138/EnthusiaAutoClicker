@@ -17,7 +17,7 @@ class AutoclickerEngineTest {
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
-        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, false, false, false);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, false, false, false, false);
 
         assertFalse(decision.holdLeft());
         assertFalse(decision.clickLeft());
@@ -34,7 +34,7 @@ class AutoclickerEngineTest {
         engine.setEnabled(true, config, 0L);
 
         config.setRightEnabled(true);
-        AutoclickerEngine.TickDecision decision = engine.decide(config, 50L, true, true, false);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, 50L, true, true, false, false);
 
         assertFalse(decision.holdLeft());
         assertFalse(decision.clickLeft());
@@ -50,10 +50,10 @@ class AutoclickerEngineTest {
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
-        assertFalse(engine.decide(config, 0L, true, false, false).clickLeft());
-        assertTrue(engine.decide(config, 50L, true, false, false).clickLeft());
-        assertFalse(engine.decide(config, 1_049L, true, false, false).clickLeft());
-        assertTrue(engine.decide(config, 1_050L, true, false, false).clickLeft());
+        assertFalse(engine.decide(config, 0L, true, false, false, false).clickLeft());
+        assertTrue(engine.decide(config, 50L, true, false, false, false).clickLeft());
+        assertFalse(engine.decide(config, 1_049L, true, false, false, false).clickLeft());
+        assertTrue(engine.decide(config, 1_050L, true, false, false, false).clickLeft());
     }
 
     @Test
@@ -62,9 +62,9 @@ class AutoclickerEngineTest {
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
-        assertTrue(engine.decide(config, 0L, true, false, false).clickLeft());
-        assertFalse(engine.decide(config, 999L, true, false, false).clickLeft());
-        assertTrue(engine.decide(config, 1_000L, true, false, false).clickLeft());
+        assertTrue(engine.decide(config, 0L, true, false, false, false).clickLeft());
+        assertFalse(engine.decide(config, 999L, true, false, false, false).clickLeft());
+        assertTrue(engine.decide(config, 1_000L, true, false, false, false).clickLeft());
     }
 
     @Test
@@ -75,7 +75,7 @@ class AutoclickerEngineTest {
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
-        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, true, false, false);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, true, false, false, false);
 
         assertFalse(decision.clickLeft());
         assertFalse(decision.clickRight());
@@ -90,11 +90,34 @@ class AutoclickerEngineTest {
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
-        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, true, false, true);
+        AutoclickerEngine.TickDecision decision = engine.decide(config, 0L, true, false, true, false);
 
         assertTrue(decision.holdFood());
         assertFalse(decision.clickLeft());
         assertFalse(decision.clickRight());
+    }
+
+    @Test
+    void blocksAllAutomatedInputForPlayerTargets() {
+        AutoclickerConfig config = config();
+        config.setRightEnabled(true);
+        AutoclickerEngine engine = new AutoclickerEngine();
+        engine.setEnabled(true, config, 0L);
+
+        AutoclickerEngine.TickDecision clickDecision =
+            engine.decide(config, 0L, true, false, false, true);
+        config.setLeftMode(ActionMode.HOLD);
+        AutoclickerEngine.TickDecision holdDecision =
+            engine.decide(config, 50L, true, false, false, true);
+
+        assertFalse(clickDecision.clickLeft());
+        assertFalse(clickDecision.clickRight());
+        assertFalse(holdDecision.holdLeft());
+        assertFalse(holdDecision.holdRight());
+
+        AutoclickerEngine.TickDecision foodDecision =
+            engine.decide(config, 100L, true, false, true, true);
+        assertFalse(foodDecision.holdFood());
     }
 
     @Test
