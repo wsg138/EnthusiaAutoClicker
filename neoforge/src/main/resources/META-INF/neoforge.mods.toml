@@ -20,6 +20,6 @@ side="CLIENT"
 [[dependencies.enthusia_autoclicker]]
 modId="minecraft"
 type="required"
-versionRange="[${minecraft_version}]"
+versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="CLIENT"

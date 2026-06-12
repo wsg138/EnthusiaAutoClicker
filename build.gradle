@@ -19,15 +19,15 @@ tasks.register('releaseJars', Sync) {
     dependsOn ':common:test', ':fabric:build', ':fabric-26.1:build', ':forge:build', ':neoforge:build'
     into layout.projectDirectory.dir('release-jars')
     from project(':fabric').layout.buildDirectory.file(
-        "libs/EnthusiaAutoClicker-${minecraft_version}-Fabric.jar"
+        "libs/EnthusiaAutoClicker-${minecraft_version_label}-Fabric.jar"
     )
     from project(':fabric-26.1').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${latest_minecraft_version}-Fabric.jar"
     )
     from project(':forge').layout.buildDirectory.file(
-        "libs/EnthusiaAutoClicker-${minecraft_version}-Forge.jar"
+        "libs/EnthusiaAutoClicker-${minecraft_version_label}-Forge.jar"
     )
     from project(':neoforge').layout.buildDirectory.file(
-        "libs/EnthusiaAutoClicker-${minecraft_version}-NeoForge.jar"
+        "libs/EnthusiaAutoClicker-${minecraft_version_label}-NeoForge.jar"
     )
 }

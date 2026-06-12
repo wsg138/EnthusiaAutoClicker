@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = "EnthusiaAutoClicker-${minecraft_version}-Forge"
+    archivesName = "EnthusiaAutoClicker-${minecraft_version_label}-Forge"
 }
 
 minecraft {
@@ -39,13 +39,15 @@ sourceSets.main.java.srcDirs(
 processResources {
     inputs.properties(
         version: mod_version,
-        minecraft_version: minecraft_version,
+        minecraft_version_label: minecraft_version_label,
+        minecraft_version_range: minecraft_version_range_loader,
         forge_version: forge_version
     )
     filesMatching('META-INF/mods.toml') {
         expand(
             version: mod_version,
-            minecraft_version: minecraft_version,
+            minecraft_version_label: minecraft_version_label,
+            minecraft_version_range: minecraft_version_range_loader,
             forge_version: forge_version
         )
     }

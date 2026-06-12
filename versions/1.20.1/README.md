@@ -1,6 +1,6 @@
-# Enthusia AutoClicker for Minecraft 1.20.1
+# Enthusia AutoClicker for Minecraft 1.20.x
 
-This standalone Gradle build produces Fabric and Forge jars for Minecraft 1.20.1.
+This standalone Gradle build produces Fabric and Forge jars for the Minecraft 1.20.x compatibility band (1.20.1+).
 
 ## Requirements
 

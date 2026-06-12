@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = "EnthusiaAutoClicker-${minecraft_version}-NeoForge"
+    archivesName = "EnthusiaAutoClicker-${minecraft_version_label}-NeoForge"
 }
 
 dependencies {
@@ -29,13 +29,15 @@ runs {
 processResources {
     inputs.properties(
         version: mod_version,
-        minecraft_version: minecraft_version,
+        minecraft_version_label: minecraft_version_label,
+        minecraft_version_range: minecraft_version_range_loader,
         neoforge_version: neoforge_version
     )
     filesMatching('META-INF/neoforge.mods.toml') {
         expand(
             version: mod_version,
-            minecraft_version: minecraft_version,
+            minecraft_version_label: minecraft_version_label,
+            minecraft_version_range: minecraft_version_range_loader,
             neoforge_version: neoforge_version
         )
     }

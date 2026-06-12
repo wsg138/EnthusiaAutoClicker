@@ -3,7 +3,7 @@ plugins {
 }
 
 base {
-    archivesName = "EnthusiaAutoClicker-${minecraft_version}-Fabric"
+    archivesName = "EnthusiaAutoClicker-1.20.x-Fabric"
 }
 
 repositories {

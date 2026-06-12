@@ -22,13 +22,13 @@ sourceSets.main.resources.srcDirs('../fabric/src/main/resources')
 
 processResources {
     inputs.property 'version', mod_version
-    inputs.property 'minecraft_version', latest_minecraft_version
+    inputs.property 'minecraft_version_range', latest_minecraft_version_range
     inputs.property 'java_version', 25
     inputs.property 'modmenu_version', latest_modmenu_version
     filesMatching('fabric.mod.json') {
         expand(
             version: mod_version,
-            minecraft_version: latest_minecraft_version,
+            minecraft_version_range: latest_minecraft_version_range,
             java_version: 25,
             modmenu_version: latest_modmenu_version
         )

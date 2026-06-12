@@ -8,7 +8,7 @@ constructing packet objects itself.
 
 | Minecraft | Fabric | Quilt | Forge | NeoForge | Java |
 |---|---:|---:|---:|---:|---:|
-| 1.21.11 | Yes | Fabric JAR | Yes | Yes | 21 |
+| 1.21.x | Yes | Fabric JAR | Yes | Yes | 21 |
 | 26.1.2 | Yes | Fabric JAR | No | No | 25 |
 
 The 26.1.2 Fabric metadata also accepts later compatible 26.1.x hotfixes. It intentionally
@@ -18,9 +18,8 @@ drops.
 Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
 Quilt-only build would duplicate the same code without improving compatibility.
 
-Minecraft 1.19 through 1.21.10 are not yet published by this repository. Supporting that range
-requires separate source adapters and builds for incompatible Minecraft API bands; widening a
-loader version range would only allow incompatible clients to launch and crash. Releases should
+Minecraft 1.19 through 1.20.x are not yet published by this repository. Supporting that range
+requires separate source adapters and builds for incompatible Minecraft API bands. Releases should
 therefore use one JAR per Minecraft compatibility band and loader, not one universal JAR.
 
 ## Usage
@@ -69,7 +68,7 @@ separate server-side integration with the chosen anti-cheat.
 
 ## Build
 
-Java 25 is required to run the complete multi-version build. The 1.21.11 artifacts target
+Java 25 is required to run the complete multi-version build. The 1.21.x artifacts target
 Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 ```powershell
@@ -78,10 +77,10 @@ Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 Output JARs:
 
-- `fabric/build/libs/EnthusiaAutoClicker-1.21.11-Fabric.jar`
+- `fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
 - `fabric-26.1/build/libs/EnthusiaAutoClicker-26.1.2-Fabric.jar`
-- `forge/build/libs/EnthusiaAutoClicker-1.21.11-Forge.jar`
-- `neoforge/build/libs/EnthusiaAutoClicker-1.21.11-NeoForge.jar`
+- `forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`
+- `neoforge/build/libs/EnthusiaAutoClicker-1.21.x-NeoForge.jar`
 
 To build and collect only the publishable runtime JARs in one place:
 
