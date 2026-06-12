@@ -42,7 +42,8 @@ The **Extras** tab includes:
 - Automatic offhand food restocking from the player inventory.
 - An optional shutdown when hungry and no usable offhand food remains.
 
-Click intervals cannot be configured below 20 ticks (1000 milliseconds).
+Click intervals support decimal tick values and cannot be configured below 12.5 ticks
+(625 milliseconds).
 
 ## Safety Behavior
 
@@ -77,10 +78,18 @@ Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 Output JARs:
 
-- `fabric/build/libs/enthusia-autoclicker-fabric-1.21.11-1.3.0.jar`
-- `fabric-26.1/build/libs/enthusia-autoclicker-fabric-26.1.2-1.3.0.jar`
-- `forge/build/libs/enthusia-autoclicker-forge-1.21.11-1.3.0.jar`
-- `neoforge/build/libs/enthusia-autoclicker-neoforge-1.21.11-1.3.0.jar`
+- `fabric/build/libs/EnthusiaAutoClicker-1.21.11-Fabric.jar`
+- `fabric-26.1/build/libs/EnthusiaAutoClicker-26.1.2-Fabric.jar`
+- `forge/build/libs/EnthusiaAutoClicker-1.21.11-Forge.jar`
+- `neoforge/build/libs/EnthusiaAutoClicker-1.21.11-NeoForge.jar`
+
+To build and collect only the publishable runtime JARs in one place:
+
+```powershell
+.\gradlew.bat releaseJars
+```
+
+The files are copied to the ignored `release-jars/` directory.
 
 ## Configuration
 

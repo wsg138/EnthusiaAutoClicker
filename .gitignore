@@ -7,3 +7,4 @@ run/
 *.iml
 *.log
 crash-reports/
+release-jars/

@@ -59,12 +59,15 @@ class AutoclickerEngineTest {
     @Test
     void enforcesConfiguredClickInterval() {
         AutoclickerConfig config = config();
+        config.setLeftIntervalMillis(625L);
         AutoclickerEngine engine = new AutoclickerEngine();
         engine.setEnabled(true, config, 0L);
 
         assertTrue(engine.decide(config, 0L, true, false, false, false).clickLeft());
-        assertFalse(engine.decide(config, 999L, true, false, false, false).clickLeft());
-        assertTrue(engine.decide(config, 1_000L, true, false, false, false).clickLeft());
+        assertFalse(engine.decide(config, 600L, true, false, false, false).clickLeft());
+        assertTrue(engine.decide(config, 650L, true, false, false, false).clickLeft());
+        assertFalse(engine.decide(config, 1_200L, true, false, false, false).clickLeft());
+        assertTrue(engine.decide(config, 1_250L, true, false, false, false).clickLeft());
     }
 
     @Test

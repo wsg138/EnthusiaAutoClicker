@@ -3,7 +3,7 @@ plugins {
 }
 
 base {
-    archivesName = "enthusia-autoclicker-fabric-${latest_minecraft_version}"
+    archivesName = "EnthusiaAutoClicker-${latest_minecraft_version}-Fabric"
 }
 
 repositories {
@@ -43,4 +43,8 @@ java {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 25
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = ''
 }

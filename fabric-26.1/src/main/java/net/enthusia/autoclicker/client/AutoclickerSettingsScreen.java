@@ -138,7 +138,7 @@ public final class AutoclickerSettingsScreen extends Screen {
             AutoclickerConfig.DEFAULT_LEFT_MODE
         );
         y += ROW_HEIGHT;
-        leftInterval = addNumberRow(
+        leftInterval = addIntervalRow(
             y,
             "screen.enthusia_autoclicker.left_interval",
             "screen.enthusia_autoclicker.left_interval.tooltip",
@@ -190,7 +190,7 @@ public final class AutoclickerSettingsScreen extends Screen {
             AutoclickerConfig.DEFAULT_RIGHT_MODE
         );
         y += ROW_HEIGHT;
-        rightInterval = addNumberRow(
+        rightInterval = addIntervalRow(
             y,
             "screen.enthusia_autoclicker.right_interval",
             "screen.enthusia_autoclicker.right_interval.tooltip",
@@ -440,6 +440,49 @@ public final class AutoclickerSettingsScreen extends Screen {
         Consumer<String> setter,
         String defaultValue
     ) {
+        return addNumericRow(
+            y,
+            labelKey,
+            tooltipKey,
+            color,
+            getter,
+            setter,
+            defaultValue,
+            false
+        );
+    }
+
+    private EditBox addIntervalRow(
+        int y,
+        String labelKey,
+        String tooltipKey,
+        int color,
+        Supplier<String> getter,
+        Consumer<String> setter,
+        String defaultValue
+    ) {
+        return addNumericRow(
+            y,
+            labelKey,
+            tooltipKey,
+            color,
+            getter,
+            setter,
+            defaultValue,
+            true
+        );
+    }
+
+    private EditBox addNumericRow(
+        int y,
+        String labelKey,
+        String tooltipKey,
+        int color,
+        Supplier<String> getter,
+        Consumer<String> setter,
+        String defaultValue,
+        boolean allowDecimal
+    ) {
         EditBox control = addRenderableWidget(new EditBox(
             font,
             controlX(),
@@ -451,9 +494,9 @@ public final class AutoclickerSettingsScreen extends Screen {
         control.setMaxLength(12);
         control.setValue(getter.get());
         control.setResponder(value -> {
-            String digits = value.replaceAll("\\D", "");
-            if (!digits.equals(value)) {
-                control.setValue(digits);
+            String filtered = filterNumericInput(value, allowDecimal);
+            if (!filtered.equals(value)) {
+                control.setValue(filtered);
                 return;
             }
             setter.accept(value);
@@ -467,6 +510,21 @@ public final class AutoclickerSettingsScreen extends Screen {
             control
         ));
         return control;
+    }
+
+    private static String filterNumericInput(String value, boolean allowDecimal) {
+        StringBuilder filtered = new StringBuilder(value.length());
+        boolean decimalSeen = false;
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            if (Character.isDigit(character)) {
+                filtered.append(character);
+            } else if (allowDecimal && character == '.' && !decimalSeen) {
+                filtered.append(character);
+                decimalSeen = true;
+            }
+        }
+        return filtered.toString();
     }
 
     private void addResetButton(int y, Runnable resetAction) {

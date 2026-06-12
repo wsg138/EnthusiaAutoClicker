@@ -138,7 +138,7 @@ public final class AutoclickerSettingsScreen extends Screen {
             AutoclickerConfig.DEFAULT_LEFT_MODE
         );
         y += ROW_HEIGHT;
-        leftInterval = addNumberRow(
+        leftInterval = addIntervalRow(
             y,
             "screen.enthusia_autoclicker.left_interval",
             "screen.enthusia_autoclicker.left_interval.tooltip",
@@ -190,7 +190,7 @@ public final class AutoclickerSettingsScreen extends Screen {
             AutoclickerConfig.DEFAULT_RIGHT_MODE
         );
         y += ROW_HEIGHT;
-        rightInterval = addNumberRow(
+        rightInterval = addIntervalRow(
             y,
             "screen.enthusia_autoclicker.right_interval",
             "screen.enthusia_autoclicker.right_interval.tooltip",
@@ -440,6 +440,49 @@ public final class AutoclickerSettingsScreen extends Screen {
         Consumer<String> setter,
         String defaultValue
     ) {
+        return addNumericRow(
+            y,
+            labelKey,
+            tooltipKey,
+            color,
+            getter,
+            setter,
+            defaultValue,
+            false
+        );
+    }
+
+    private EditBox addIntervalRow(
+        int y,
+        String labelKey,
+        String tooltipKey,
+        int color,
+        Supplier<String> getter,
+        Consumer<String> setter,
+        String defaultValue
+    ) {
+        return addNumericRow(
+            y,
+            labelKey,
+            tooltipKey,
+            color,
+            getter,
+            setter,
+            defaultValue,
+            true
+        );
+    }
+
+    private EditBox addNumericRow(
+        int y,
+        String labelKey,
+        String tooltipKey,
+        int color,
+        Supplier<String> getter,
+        Consumer<String> setter,
+        String defaultValue,
+        boolean allowDecimal
+    ) {
         EditBox control = addRenderableWidget(new EditBox(
             font,
             controlX(),
@@ -448,7 +491,9 @@ public final class AutoclickerSettingsScreen extends Screen {
             20,
             Component.translatable(labelKey)
         ));
-        control.setFilter(candidate -> candidate.matches("\\d*"));
+        control.setFilter(candidate -> candidate.matches(
+            allowDecimal ? "\\d*(\\.\\d*)?" : "\\d*"
+        ));
         control.setMaxLength(12);
         control.setValue(getter.get());
         control.setResponder(setter);

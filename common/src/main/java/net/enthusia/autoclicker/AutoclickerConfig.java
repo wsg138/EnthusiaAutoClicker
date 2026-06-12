@@ -333,7 +333,7 @@ public final class AutoclickerConfig {
 
     private static long requireInterval(long millis) {
         if (millis < DurationParser.MINIMUM_CLICK_INTERVAL_MILLIS) {
-            throw new IllegalArgumentException("Click interval cannot be faster than 20 ticks.");
+            throw new IllegalArgumentException("Click interval cannot be faster than 12.5 ticks.");
         }
         return millis;
     }

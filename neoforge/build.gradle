@@ -4,7 +4,7 @@ plugins {
 }
 
 base {
-    archivesName = "enthusia-autoclicker-neoforge-${minecraft_version}"
+    archivesName = "EnthusiaAutoClicker-${minecraft_version}-NeoForge"
 }
 
 dependencies {
@@ -50,4 +50,8 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21
     options.compilerArgs.add('-Xlint:deprecation')
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = ''
 }

@@ -63,4 +63,14 @@ class AutoclickerConfigTest {
         assertThrows(IllegalArgumentException.class, () -> config.setMinimumDurability(0));
         assertThrows(IllegalArgumentException.class, () -> config.setRestockAtCount(64));
     }
+
+    @Test
+    void acceptsTwelveAndAHalfTickIntervals() {
+        AutoclickerConfig config = AutoclickerConfig.load(tempDirectory.resolve("config.properties"));
+
+        config.setLeftIntervalMillis(625L);
+
+        assertEquals(625L, config.leftIntervalMillis());
+        assertThrows(IllegalArgumentException.class, () -> config.setLeftIntervalMillis(624L));
+    }
 }

@@ -1,6 +1,8 @@
 package net.enthusia.autoclicker;
 
 public final class AutoclickerEngine {
+    private static final long CLIENT_TICK_MILLIS = 50L;
+
     private boolean enabled;
     private long stopAtMillis;
     private long nextLeftClickMillis;
@@ -60,7 +62,11 @@ public final class AutoclickerEngine {
         boolean clickRight = config.rightEnabled()
             && isDue(config.rightMode(), nowMillis, nextRightClickMillis);
         if (clickRight) {
-            nextRightClickMillis = nowMillis + config.rightIntervalMillis();
+            nextRightClickMillis = advanceDeadline(
+                nextRightClickMillis,
+                nowMillis,
+                config.rightIntervalMillis()
+            );
         }
 
         boolean rightStartsThisTick = (holdRight && !rightHoldActive) || clickRight;
@@ -74,7 +80,11 @@ public final class AutoclickerEngine {
             && !rightStartsThisTick
             && isDue(config.leftMode(), nowMillis, nextLeftClickMillis);
         if (clickLeft) {
-            nextLeftClickMillis = nowMillis + config.leftIntervalMillis();
+            nextLeftClickMillis = advanceDeadline(
+                nextLeftClickMillis,
+                nowMillis,
+                config.leftIntervalMillis()
+            );
         }
 
         return new TickDecision(holdLeft, clickLeft, holdRight, clickRight, false);
@@ -86,6 +96,19 @@ public final class AutoclickerEngine {
 
     private static boolean isDue(ActionMode mode, long nowMillis, long dueMillis) {
         return mode == ActionMode.CLICK && nowMillis >= dueMillis;
+    }
+
+    private static long advanceDeadline(long dueMillis, long nowMillis, long intervalMillis) {
+        try {
+            long expectedTickMillis = Math.multiplyExact(
+                Math.ceilDiv(dueMillis, CLIENT_TICK_MILLIS),
+                CLIENT_TICK_MILLIS
+            );
+            long baseMillis = nowMillis <= expectedTickMillis ? dueMillis : nowMillis;
+            return Math.addExact(baseMillis, intervalMillis);
+        } catch (ArithmeticException exception) {
+            return Long.MAX_VALUE;
+        }
     }
 
     public record TickDecision(
