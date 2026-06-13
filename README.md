@@ -8,6 +8,7 @@ constructing packet objects itself.
 
 | Minecraft | Fabric | Quilt | Forge | NeoForge | Java |
 |---|---:|---:|---:|---:|---:|
+| 1.20.x | Yes | Fabric JAR | Yes | No | 17 |
 | 1.21.x | Yes | Fabric JAR | Yes | Yes | 21 |
 | 26.1.2 | Yes | Fabric JAR | No | No | 25 |
 
@@ -18,8 +19,8 @@ drops.
 Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
 Quilt-only build would duplicate the same code without improving compatibility.
 
-Minecraft 1.19 through 1.20.x are not yet published by this repository. Supporting that range
-requires separate source adapters and builds for incompatible Minecraft API bands. Releases should
+Minecraft 1.20.x is published in the separate `versions/1.20.x` build directory. Supporting later
+bands requires separate source adapters and builds for incompatible Minecraft API bands. Releases
 therefore use one JAR per Minecraft compatibility band and loader, not one universal JAR.
 
 ## Usage
@@ -77,10 +78,10 @@ Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 Output JARs:
 
-- `fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
-- `fabric-26.1/build/libs/EnthusiaAutoClicker-26.1.2-Fabric.jar`
-- `forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`
-- `neoforge/build/libs/EnthusiaAutoClicker-1.21.x-NeoForge.jar`
+- `versions/1.21.x/fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
+- `versions/26.x/fabric/build/libs/EnthusiaAutoClicker-26.1.2-Fabric.jar`
+- `versions/1.21.x/forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`
+- `versions/1.21.x/neoforge/build/libs/EnthusiaAutoClicker-1.21.x-NeoForge.jar`
 
 To build and collect only the publishable runtime JARs in one place:
 

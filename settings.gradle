@@ -13,3 +13,8 @@ plugins {
 
 rootProject.name = 'EnthusiaAutoClicker'
 include 'common', 'fabric', 'fabric-26.1', 'forge', 'neoforge'
+
+project(':fabric').projectDir = file('versions/1.21.x/fabric')
+project(':forge').projectDir = file('versions/1.21.x/forge')
+project(':neoforge').projectDir = file('versions/1.21.x/neoforge')
+project(':fabric-26.1').projectDir = file('versions/26.x/fabric')
