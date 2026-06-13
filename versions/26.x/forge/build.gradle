@@ -1,0 +1,74 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle'
+}
+
+base {
+    archivesName = "EnthusiaAutoClicker-${latest_minecraft_version_label}-Forge"
+}
+
+minecraft {
+    mappings channel: 'official', version: latest_minecraft_version
+
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+        }
+
+        register('client')
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${forge_26_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
+}
+
+sourceSets.main.java.srcDirs(
+    '../../../common/src/main/java',
+    '../shared-client/src/main/java'
+)
+
+processResources {
+    from('../../1.21.x/fabric/src/main/resources/assets/enthusia_autoclicker/lang') {
+        into 'assets/enthusia_autoclicker/lang'
+    }
+    from('../../1.21.x/fabric/src/main/resources/assets/enthusia_autoclicker/icon.png') {
+        rename { 'enthusia_autoclicker.png' }
+    }
+    inputs.properties(
+        version: mod_version,
+        minecraft_version_label: latest_minecraft_version_label,
+        minecraft_version_range: latest_minecraft_version_range_loader,
+        forge_version: forge_26_version
+    )
+    filesMatching('META-INF/mods.toml') {
+        expand(
+            version: mod_version,
+            minecraft_version_label: latest_minecraft_version_label,
+            minecraft_version_range: latest_minecraft_version_range_loader,
+            forge_version: forge_26_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = ''
+}

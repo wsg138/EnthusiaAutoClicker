@@ -3,7 +3,7 @@ plugins {
 }
 
 base {
-    archivesName = "EnthusiaAutoClicker-${latest_minecraft_version}-Fabric"
+    archivesName = "EnthusiaAutoClicker-${latest_minecraft_version_label}-Fabric"
 }
 
 repositories {
@@ -17,7 +17,10 @@ dependencies {
     compileOnly "com.terraformersmc:modmenu:${latest_modmenu_version}"
 }
 
-sourceSets.main.java.srcDir('../../../common/src/main/java')
+sourceSets.main.java.srcDirs(
+    '../../../common/src/main/java',
+    '../shared-client/src/main/java'
+)
 sourceSets.main.resources.srcDirs('../../1.21.x/fabric/src/main/resources')
 
 processResources {

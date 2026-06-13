@@ -10,9 +10,9 @@ constructing packet objects itself.
 |---|---:|---:|---:|---:|---:|
 | 1.20.x | Yes | Fabric JAR | Yes | No | 17 |
 | 1.21.x | Yes | Fabric JAR | Yes | Yes | 21 |
-| 26.1.2 | Yes | Fabric JAR | No | No | 25 |
+| 26.1.x | Yes | Fabric JAR | Yes | Yes | 25 |
 
-The 26.1.2 Fabric metadata also accepts later compatible 26.1.x hotfixes. It intentionally
+The 26.1.x Fabric metadata also accepts later compatible 26.1.x hotfixes. It intentionally
 does not claim compatibility with 26.2 because Minecraft client APIs can change between game
 drops.
 
@@ -70,7 +70,7 @@ separate server-side integration with the chosen anti-cheat.
 ## Build
 
 Java 25 is required to run the complete multi-version build. The 1.21.x artifacts target
-Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
+Java 21 bytecode; the 26.1.x artifacts require Java 25.
 
 ```powershell
 .\gradlew.bat build
@@ -78,10 +78,14 @@ Java 21 bytecode; only the 26.1.2 artifact requires Java 25 at runtime.
 
 Output JARs:
 
+- `versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.x-Fabric.jar`
+- `versions/1.20.x/forge/build/libs/EnthusiaAutoClicker-1.20.x-Forge.jar`
 - `versions/1.21.x/fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
-- `versions/26.x/fabric/build/libs/EnthusiaAutoClicker-26.1.2-Fabric.jar`
+- `versions/26.x/fabric/build/libs/EnthusiaAutoClicker-26.1.x-Fabric.jar`
 - `versions/1.21.x/forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`
 - `versions/1.21.x/neoforge/build/libs/EnthusiaAutoClicker-1.21.x-NeoForge.jar`
+- `versions/26.x/forge/build/libs/EnthusiaAutoClicker-26.1.x-Forge.jar`
+- `versions/26.x/neoforge/build/libs/EnthusiaAutoClicker-26.1.x-NeoForge.jar`
 
 To build and collect only the publishable runtime JARs in one place:
 

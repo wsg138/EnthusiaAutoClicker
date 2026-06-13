@@ -11,23 +11,46 @@ allprojects {
     version = mod_version
 }
 
+tasks.register('buildMinecraft120', Exec) {
+    workingDir layout.projectDirectory.dir('versions/1.20.x')
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'gradlew.bat', 'build', '--console=plain'
+    } else {
+        commandLine './gradlew', 'build', '--console=plain'
+    }
+}
+
 tasks.named('build') {
-    dependsOn ':common:test', ':fabric:build', ':fabric-26.1:build', ':forge:build', ':neoforge:build'
+    dependsOn 'buildMinecraft120', ':common:test', ':fabric:build', ':fabric-26.1:build', ':forge:build', ':neoforge:build',
+        ':forge-26.1:build', ':neoforge-26.1:build'
 }
 
 tasks.register('releaseJars', Sync) {
-    dependsOn ':common:test', ':fabric:build', ':fabric-26.1:build', ':forge:build', ':neoforge:build'
+    dependsOn 'buildMinecraft120', ':common:test', ':fabric:build', ':fabric-26.1:build', ':forge:build', ':neoforge:build',
+        ':forge-26.1:build', ':neoforge-26.1:build'
     into layout.projectDirectory.dir('release-jars')
+    from layout.projectDirectory.file(
+        'versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.x-Fabric.jar'
+    )
+    from layout.projectDirectory.file(
+        'versions/1.20.x/forge/build/libs/EnthusiaAutoClicker-1.20.x-Forge.jar'
+    )
     from project(':fabric').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${minecraft_version_label}-Fabric.jar"
     )
     from project(':fabric-26.1').layout.buildDirectory.file(
-        "libs/EnthusiaAutoClicker-${latest_minecraft_version}-Fabric.jar"
+        "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-Fabric.jar"
     )
     from project(':forge').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${minecraft_version_label}-Forge.jar"
     )
     from project(':neoforge').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${minecraft_version_label}-NeoForge.jar"
+    )
+    from project(':forge-26.1').layout.buildDirectory.file(
+        "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-Forge.jar"
+    )
+    from project(':neoforge-26.1').layout.buildDirectory.file(
+        "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-NeoForge.jar"
     )
 }
