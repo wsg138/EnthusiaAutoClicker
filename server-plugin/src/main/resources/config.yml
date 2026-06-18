@@ -1,0 +1,17 @@
+# Maximum distance, in blocks, a player can move from the activation point before autoclicking stops.
+max-movement-blocks: 0.75
+
+# Vanilla survival attack reach is about 3 blocks. Keep this conservative for Java and Bedrock parity.
+attack-range-blocks: 3.0
+
+# Small ray size makes targeting feel closer to a real crosshair click without requiring perfect geometry.
+ray-size-blocks: 0.15
+
+# Minimum accepted fixed interval for /autoclick <ticks>.
+minimum-fixed-interval-ticks: 1
+
+# If true, stop when there is no valid non-player target under the crosshair.
+stop-when-no-target: false
+
+# If true, stop when the player changes worlds or teleports.
+stop-on-teleport: true

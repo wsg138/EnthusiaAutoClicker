@@ -1,0 +1,16 @@
+name: EnthusiaServerAutoClicker
+main: net.enthusia.autoclicker.server.EnthusiaServerAutoClickerPlugin
+version: 1.0.0
+api-version: '1.20'
+author: P2wn
+depend:
+  - CombatX
+commands:
+  autoclick:
+    description: Toggle or configure the server-side autoclicker.
+    usage: /autoclick [ticks|off|status]
+    permission: enthusia.autoclicker.use
+permissions:
+  enthusia.autoclicker.use:
+    description: Allows use of the server-side autoclicker.
+    default: true

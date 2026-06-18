@@ -109,3 +109,9 @@ The files are copied to the ignored `release-jars/` directory.
 
 Settings are stored in `config/enthusia-autoclicker.properties`. Writes use a temporary file
 and an atomic replacement when the filesystem supports it.
+
+## Server Plugin
+
+The `server-plugin/` directory contains a separate Paper plugin that provides server-side automatic
+melee attacks for Java and Geyser/Floodgate Bedrock players. It requires CombatX and stops when
+CombatX reports the player is in combat.

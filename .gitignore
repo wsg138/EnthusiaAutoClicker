@@ -2,6 +2,7 @@
 build/
 run/
 **/build/
+**/target/
 **/run/
 .idea/
 *.iml
