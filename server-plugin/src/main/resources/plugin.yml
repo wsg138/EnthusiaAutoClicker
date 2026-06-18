@@ -3,7 +3,7 @@ main: net.enthusia.autoclicker.server.EnthusiaServerAutoClickerPlugin
 version: 1.0.0
 api-version: '1.20'
 author: P2wn
-depend:
+softdepend:
   - CombatX
 commands:
   autoclick:

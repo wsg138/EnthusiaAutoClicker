@@ -20,9 +20,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
 
         combatX = new CombatXHook();
         if (!combatX.initialize(this)) {
-            getLogger().severe("CombatX is required. Disabling server autoclicker.");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
+            getLogger().warning("CombatX is required. The plugin will load, but /autoclick will stay blocked.");
         }
 
         service = new AutoClickService(this, combatX);
