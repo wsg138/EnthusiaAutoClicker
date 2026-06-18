@@ -8,7 +8,9 @@ constructing packet objects itself.
 
 | Minecraft | Fabric | Quilt | Forge | NeoForge | Java |
 |---|---:|---:|---:|---:|---:|
-| 1.20.x | Yes | Fabric JAR | Yes | No | 17 |
+| 1.20.1 | Yes | Fabric JAR | Yes | No | 17 |
+| 1.20.2-1.20.4 | Yes | Fabric JAR | Yes | No | 17 |
+| 1.20.5-1.20.6 | Yes | Fabric JAR | Yes | No | 21 |
 | 1.21.x | Yes | Fabric JAR | Yes | Yes | 21 |
 | 26.1.x | Yes | Fabric JAR | Yes | Yes | 25 |
 
@@ -19,9 +21,9 @@ drops.
 Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
 Quilt-only build would duplicate the same code without improving compatibility.
 
-Minecraft 1.20.x is published in the separate `versions/1.20.x` build directory. Supporting later
-bands requires separate source adapters and builds for incompatible Minecraft API bands. Releases
-therefore use one JAR per Minecraft compatibility band and loader, not one universal JAR.
+Minecraft 1.20 is published as three separate compatibility bands because Mojang changed client APIs
+mid-series: `1.20.1`, `1.20.2-1.20.4`, and `1.20.5-1.20.6`. Releases therefore use one JAR per
+Minecraft compatibility band and loader, not one universal 1.20 JAR.
 
 ## Usage
 
@@ -69,8 +71,9 @@ separate server-side integration with the chosen anti-cheat.
 
 ## Build
 
-Java 25 is required to run the complete multi-version build. The 1.21.x artifacts target
-Java 21 bytecode; the 26.1.x artifacts require Java 25.
+Java 25 is required to run the complete multi-version build. The `1.20.1` and `1.20.2-1.20.4`
+artifacts target Java 17 bytecode, the `1.20.5-1.20.6` and `1.21.x` artifacts target Java 21,
+and the `26.1.x` artifacts require Java 25.
 
 ```powershell
 .\gradlew.bat build
@@ -78,8 +81,12 @@ Java 21 bytecode; the 26.1.x artifacts require Java 25.
 
 Output JARs:
 
-- `versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.x-Fabric.jar`
-- `versions/1.20.x/forge/build/libs/EnthusiaAutoClicker-1.20.x-Forge.jar`
+- `versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.1-Fabric.jar`
+- `versions/1.20.x/forge/build/libs/EnthusiaAutoClicker-1.20.1-Forge.jar`
+- `versions/1.20.2-1.20.4/fabric/build/libs/EnthusiaAutoClicker-1.20.2-1.20.4-Fabric.jar`
+- `versions/1.20.2-1.20.4/forge/build/libs/EnthusiaAutoClicker-1.20.2-1.20.4-Forge.jar`
+- `versions/1.20.5-1.20.6/fabric/build/libs/EnthusiaAutoClicker-1.20.5-1.20.6-Fabric.jar`
+- `versions/1.20.5-1.20.6/forge/build/libs/EnthusiaAutoClicker-1.20.5-1.20.6-Forge.jar`
 - `versions/1.21.x/fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
 - `versions/26.x/fabric/build/libs/EnthusiaAutoClicker-26.1.x-Fabric.jar`
 - `versions/1.21.x/forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`

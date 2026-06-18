@@ -6,5 +6,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'EnthusiaAutoClicker-1.20.x'
+rootProject.name = 'EnthusiaAutoClicker-1.20.1'
 include 'common', 'fabric', 'forge'
