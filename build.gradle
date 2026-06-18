@@ -20,6 +20,15 @@ tasks.register('buildMinecraft1201', Exec) {
     }
 }
 
+tasks.register('buildMinecraft1200', Exec) {
+    workingDir layout.projectDirectory.dir('versions/1.20')
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
+    } else {
+        commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
+    }
+}
+
 tasks.register('buildMinecraft12024', Exec) {
     workingDir layout.projectDirectory.dir('versions/1.20.2-1.20.4')
     if (System.getProperty('os.name').toLowerCase().contains('windows')) {
@@ -39,14 +48,20 @@ tasks.register('buildMinecraft12056', Exec) {
 }
 
 tasks.named('build') {
-    dependsOn 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
+    dependsOn 'buildMinecraft1200', 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
         ':fabric-26.1:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':neoforge-26.1:build'
 }
 
 tasks.register('releaseJars', Sync) {
-    dependsOn 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
+    dependsOn 'buildMinecraft1200', 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
         ':fabric-26.1:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':neoforge-26.1:build'
     into layout.projectDirectory.dir('release-jars')
+    from layout.projectDirectory.file(
+        'versions/1.20/fabric/build/libs/EnthusiaAutoClicker-1.20-Fabric.jar'
+    )
+    from layout.projectDirectory.file(
+        'versions/1.20/forge/build/libs/EnthusiaAutoClicker-1.20-Forge.jar'
+    )
     from layout.projectDirectory.file(
         'versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.1-Fabric.jar'
     )

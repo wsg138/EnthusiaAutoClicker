@@ -8,6 +8,7 @@ constructing packet objects itself.
 
 | Minecraft | Fabric | Quilt | Forge | NeoForge | Java |
 |---|---:|---:|---:|---:|---:|
+| 1.20 | Yes | Fabric JAR | Yes | No | 17 |
 | 1.20.1 | Yes | Fabric JAR | Yes | No | 17 |
 | 1.20.2-1.20.4 | Yes | Fabric JAR | Yes | No | 17 |
 | 1.20.5-1.20.6 | Yes | Fabric JAR | Yes | No | 21 |
@@ -21,9 +22,9 @@ drops.
 Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
 Quilt-only build would duplicate the same code without improving compatibility.
 
-Minecraft 1.20 is published as three separate compatibility bands because Mojang changed client APIs
-mid-series: `1.20.1`, `1.20.2-1.20.4`, and `1.20.5-1.20.6`. Releases therefore use one JAR per
-Minecraft compatibility band and loader, not one universal 1.20 JAR.
+Minecraft 1.20 is published as four separate compatibility bands because Mojang changed client APIs
+mid-series: `1.20`, `1.20.1`, `1.20.2-1.20.4`, and `1.20.5-1.20.6`. Releases therefore use one JAR
+per Minecraft compatibility band and loader, not one universal 1.20 JAR.
 
 ## Usage
 
@@ -71,7 +72,7 @@ separate server-side integration with the chosen anti-cheat.
 
 ## Build
 
-Java 25 is required to run the complete multi-version build. The `1.20.1` and `1.20.2-1.20.4`
+Java 25 is required to run the complete multi-version build. The `1.20`, `1.20.1`, and `1.20.2-1.20.4`
 artifacts target Java 17 bytecode, the `1.20.5-1.20.6` and `1.21.x` artifacts target Java 21,
 and the `26.1.x` artifacts require Java 25.
 
@@ -81,6 +82,8 @@ and the `26.1.x` artifacts require Java 25.
 
 Output JARs:
 
+- `versions/1.20/fabric/build/libs/EnthusiaAutoClicker-1.20-Fabric.jar`
+- `versions/1.20/forge/build/libs/EnthusiaAutoClicker-1.20-Forge.jar`
 - `versions/1.20.x/fabric/build/libs/EnthusiaAutoClicker-1.20.1-Fabric.jar`
 - `versions/1.20.x/forge/build/libs/EnthusiaAutoClicker-1.20.1-Forge.jar`
 - `versions/1.20.2-1.20.4/fabric/build/libs/EnthusiaAutoClicker-1.20.2-1.20.4-Fabric.jar`
