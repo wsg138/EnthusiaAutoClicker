@@ -3,7 +3,7 @@ plugins {
     id 'fabric-loom' version '1.14.10' apply false
     id 'net.fabricmc.fabric-loom' version '1.14.10' apply false
     id 'net.minecraftforge.gradle' version '[7.0.3,8)' apply false
-    id 'net.neoforged.gradle.userdev' version '7.1.36' apply false
+    id 'net.neoforged.gradle.userdev' version '7.1.38' apply false
 }
 
 allprojects {
@@ -49,12 +49,14 @@ tasks.register('buildMinecraft12056', Exec) {
 
 tasks.named('build') {
     dependsOn 'buildMinecraft1200', 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
-        ':fabric-26.1:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':neoforge-26.1:build'
+        ':fabric-26.1:build', ':fabric-26.2:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':forge-26.2:build',
+        ':neoforge-26.1:build', ':neoforge-26.2:build'
 }
 
 tasks.register('releaseJars', Sync) {
     dependsOn 'buildMinecraft1200', 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
-        ':fabric-26.1:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':neoforge-26.1:build'
+        ':fabric-26.1:build', ':fabric-26.2:build', ':forge:build', ':neoforge:build', ':forge-26.1:build', ':forge-26.2:build',
+        ':neoforge-26.1:build', ':neoforge-26.2:build'
     into layout.projectDirectory.dir('release-jars')
     from layout.projectDirectory.file(
         'versions/1.20/fabric/build/libs/EnthusiaAutoClicker-1.20-Fabric.jar'
@@ -86,6 +88,9 @@ tasks.register('releaseJars', Sync) {
     from project(':fabric-26.1').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-Fabric.jar"
     )
+    from project(':fabric-26.2').layout.buildDirectory.file(
+        "libs/EnthusiaAutoClicker-${plus_minecraft_version_label}-Fabric.jar"
+    )
     from project(':forge').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${minecraft_version_label}-Forge.jar"
     )
@@ -95,7 +100,13 @@ tasks.register('releaseJars', Sync) {
     from project(':forge-26.1').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-Forge.jar"
     )
+    from project(':forge-26.2').layout.buildDirectory.file(
+        "libs/EnthusiaAutoClicker-${plus_minecraft_version_label}-Forge.jar"
+    )
     from project(':neoforge-26.1').layout.buildDirectory.file(
         "libs/EnthusiaAutoClicker-${latest_minecraft_version_label}-NeoForge.jar"
+    )
+    from project(':neoforge-26.2').layout.buildDirectory.file(
+        "libs/EnthusiaAutoClicker-${plus_minecraft_version_label}-NeoForge.jar"
     )
 }

@@ -1,0 +1,65 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev'
+}
+
+base {
+    archivesName = "EnthusiaAutoClicker-${plus_minecraft_version_label}-NeoForge"
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_26_2_version}"
+}
+
+sourceSets.main.java.srcDirs(
+    '../../../common/src/main/java',
+    '../shared-client/src/main/java'
+)
+
+runs {
+    configureEach {
+        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        modSource project.sourceSets.main
+    }
+
+    client {
+    }
+}
+
+processResources {
+    from('../../1.21.x/fabric/src/main/resources/assets/enthusia_autoclicker/lang') {
+        into 'assets/enthusia_autoclicker/lang'
+    }
+    from('../../1.21.x/fabric/src/main/resources/assets/enthusia_autoclicker/icon.png') {
+        rename { 'enthusia_autoclicker.png' }
+    }
+    inputs.properties(
+        version: mod_version,
+        minecraft_version_label: plus_minecraft_version_label,
+        minecraft_version_range: plus_minecraft_version_range_loader,
+        neoforge_version: neoforge_26_2_version
+    )
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand(
+            version: mod_version,
+            minecraft_version_label: plus_minecraft_version_label,
+            minecraft_version_range: plus_minecraft_version_range_loader,
+            neoforge_version: neoforge_26_2_version
+        )
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+    options.compilerArgs.add('-Xlint:deprecation')
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = ''
+}

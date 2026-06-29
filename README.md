@@ -14,10 +14,11 @@ constructing packet objects itself.
 | 1.20.5-1.20.6 | Yes | Fabric JAR | Yes | No | 21 |
 | 1.21.x | Yes | Fabric JAR | Yes | Yes | 21 |
 | 26.1.x | Yes | Fabric JAR | Yes | Yes | 25 |
+| 26.2 | Yes | Fabric JAR | Yes | Yes | 25 |
 
-The 26.1.x Fabric metadata also accepts later compatible 26.1.x hotfixes. It intentionally
-does not claim compatibility with 26.2 because Minecraft client APIs can change between game
-drops.
+The 26.1.x Fabric metadata also accepts later compatible 26.1.x hotfixes. Minecraft 26.2 is
+published as a separate compatibility band because Minecraft client APIs changed between 26.1.x
+and 26.2.
 
 Quilt Loader supports Fabric mods, so the Fabric JAR is also the Quilt artifact. A separate
 Quilt-only build would duplicate the same code without improving compatibility.
@@ -62,7 +63,8 @@ Click intervals support decimal tick values and cannot be configured below 12.5 
 - Inventory scans are limited to once per second while the relevant automation is enabled.
 - The autoclicker disables on world exit, and GUI time does not count toward the armor-stand delay.
 - A newly started right-click hold or right click takes priority over left click for that tick.
-- The mod does not construct packet objects or send custom protocol messages.
+- The mod does not construct vanilla gameplay packet objects. It sends one private handshake
+  plugin message so the optional server plugin can detect updated client jars.
 - The mod does not run without a loaded player, level, and client game mode.
 
 This behavior is intended to avoid malformed or impossible protocol sequences. Server owners
@@ -74,7 +76,7 @@ separate server-side integration with the chosen anti-cheat.
 
 Java 25 is required to run the complete multi-version build. The `1.20`, `1.20.1`, and `1.20.2-1.20.4`
 artifacts target Java 17 bytecode, the `1.20.5-1.20.6` and `1.21.x` artifacts target Java 21,
-and the `26.1.x` artifacts require Java 25.
+and the `26.1.x` and `26.2` artifacts require Java 25.
 
 ```powershell
 .\gradlew.bat build
@@ -92,10 +94,13 @@ Output JARs:
 - `versions/1.20.5-1.20.6/forge/build/libs/EnthusiaAutoClicker-1.20.5-1.20.6-Forge.jar`
 - `versions/1.21.x/fabric/build/libs/EnthusiaAutoClicker-1.21.x-Fabric.jar`
 - `versions/26.x/fabric/build/libs/EnthusiaAutoClicker-26.1.x-Fabric.jar`
+- `versions/26.2/fabric/build/libs/EnthusiaAutoClicker-26.2-Fabric.jar`
 - `versions/1.21.x/forge/build/libs/EnthusiaAutoClicker-1.21.x-Forge.jar`
 - `versions/1.21.x/neoforge/build/libs/EnthusiaAutoClicker-1.21.x-NeoForge.jar`
 - `versions/26.x/forge/build/libs/EnthusiaAutoClicker-26.1.x-Forge.jar`
 - `versions/26.x/neoforge/build/libs/EnthusiaAutoClicker-26.1.x-NeoForge.jar`
+- `versions/26.2/forge/build/libs/EnthusiaAutoClicker-26.2-Forge.jar`
+- `versions/26.2/neoforge/build/libs/EnthusiaAutoClicker-26.2-NeoForge.jar`
 
 To build and collect only the publishable runtime JARs in one place:
 
