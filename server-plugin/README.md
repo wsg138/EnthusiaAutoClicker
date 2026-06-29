@@ -40,7 +40,7 @@ client mod sends a private plugin-message handshake on `enthusia_autoclicker:han
 does not use client brand strings or passive plugin-channel guessing.
 
 Current client jars send this handshake during the play connection join phase. `/autoclick check <player>`
-reports `Not detected.` until that player's client has joined with a jar that includes the handshake.
+reports whether Enthusia AutoClicker was detected for that player.
 
 ## Build
 

@@ -93,10 +93,14 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
 
         Optional<ClientHandshake> handshake = handshakeService.handshake(target);
         if (handshake.isEmpty()) {
-            sender.sendMessage(ChatColor.RED + "Not detected.");
+            sender.sendMessage(ChatColor.GOLD + "Enthusia AutoClicker was " + ChatColor.RED
+                + "NOT DETECTED" + ChatColor.GOLD + " for " + ChatColor.WHITE + target.getName()
+                + ChatColor.GOLD + ".");
             return true;
         }
-        sender.sendMessage(ChatColor.GREEN + "Detected.");
+        sender.sendMessage(ChatColor.GOLD + "Enthusia AutoClicker was " + ChatColor.GREEN
+            + "DETECTED" + ChatColor.GOLD + " for " + ChatColor.WHITE + target.getName()
+            + ChatColor.GOLD + ".");
         return true;
     }
 
