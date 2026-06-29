@@ -21,7 +21,6 @@ events, and other server-side combat rules.
 - `/autoclick off` disables it.
 - `/autoclick status` shows the current mode.
 - `/autoclick check <player>` silently checks whether the client mod completed its private handshake.
-  Current client jars disable that handshake by default to avoid login disconnects.
 
 ## Safety
 
@@ -40,9 +39,8 @@ The check command is intentionally silent to the target player. It only reports 
 client mod sends a private plugin-message handshake on `enthusia_autoclicker:handshake`. The command
 does not use client brand strings or passive plugin-channel guessing.
 
-The current client jars do not send this handshake by default because the newer custom payload encoders
-need a safer per-version implementation. Until that is restored, `/autoclick check <player>` will usually
-report `NOT DETECTED`.
+Current client jars send this handshake during the play connection join phase. `/autoclick check <player>`
+reports `NOT DETECTED` until that player's client has joined with a jar that includes the handshake.
 
 ## Build
 

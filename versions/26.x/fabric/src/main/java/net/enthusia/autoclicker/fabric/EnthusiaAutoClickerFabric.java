@@ -1,7 +1,6 @@
 package net.enthusia.autoclicker.fabric;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.netty.buffer.Unpooled;
 import java.nio.file.Path;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.client.AutoclickerRuntime;
@@ -11,10 +10,12 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -33,6 +34,7 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        PayloadTypeRegistry.serverboundPlay().register(HandshakePayload.TYPE, HandshakePayload.CODEC);
         KeyMapping toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
             "key.enthusia_autoclicker.toggle",
             InputConstants.Type.KEYSYM,
@@ -64,24 +66,39 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
     }
 
     private static void sendHandshake() {
-        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
-            return;
-        }
-        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(1);
-        buffer.writeUtf(FabricLoader.getInstance().getModContainer("enthusia_autoclicker")
-            .map(container -> container.getMetadata().getVersion().getFriendlyString())
-            .orElse("unknown"));
-        buffer.writeUtf("fabric");
-        buffer.writeUtf(FabricLoader.getInstance().getModContainer("minecraft")
-            .map(container -> container.getMetadata().getVersion().getFriendlyString())
-            .orElse("unknown"));
-        ClientPlayNetworking.send(new HandshakePayload(buffer));
+        ClientPlayNetworking.send(new HandshakePayload(
+            1,
+            FabricLoader.getInstance().getModContainer("enthusia_autoclicker")
+                .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                .orElse("unknown"),
+            "fabric",
+            FabricLoader.getInstance().getModContainer("minecraft")
+                .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                .orElse("unknown")
+        ));
     }
 
-    private record HandshakePayload(FriendlyByteBuf data) implements CustomPacketPayload {
+    private record HandshakePayload(
+        int protocolVersion,
+        String modVersion,
+        String loader,
+        String minecraftVersion
+    ) implements CustomPacketPayload {
         private static final CustomPacketPayload.Type<HandshakePayload> TYPE =
             new CustomPacketPayload.Type<>(HANDSHAKE_CHANNEL);
+        private static final StreamCodec<FriendlyByteBuf, HandshakePayload> CODEC =
+            CustomPacketPayload.codec(HandshakePayload::write, HandshakePayload::read);
+
+        private static HandshakePayload read(FriendlyByteBuf buffer) {
+            return new HandshakePayload(buffer.readByte(), buffer.readUtf(), buffer.readUtf(), buffer.readUtf());
+        }
+
+        private void write(FriendlyByteBuf buffer) {
+            buffer.writeByte(protocolVersion);
+            buffer.writeUtf(modVersion);
+            buffer.writeUtf(loader);
+            buffer.writeUtf(minecraftVersion);
+        }
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

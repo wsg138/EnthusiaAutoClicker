@@ -1,7 +1,6 @@
 package net.enthusia.autoclicker.neoforge;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.netty.buffer.Unpooled;
 import java.nio.file.Path;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.client.AutoclickerRuntime;
@@ -9,6 +8,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -22,6 +23,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import org.lwjgl.glfw.GLFW;
 
 @Mod(value = EnthusiaAutoClickerNeoForge.MOD_ID, dist = Dist.CLIENT)
@@ -59,6 +61,13 @@ public final class EnthusiaAutoClickerNeoForge {
     }
 
     @SubscribeEvent
+    public static void registerPayloads(RegisterPayloadHandlersEvent event) {
+        event.registrar(MOD_ID)
+            .optional()
+            .playToServer(HandshakePayload.TYPE, HandshakePayload.CODEC, (payload, context) -> {});
+    }
+
+    @SubscribeEvent
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
         event.registerCategory(CATEGORY);
         event.register(TOGGLE_KEY);
@@ -81,20 +90,35 @@ public final class EnthusiaAutoClickerNeoForge {
 
     @SubscribeEvent
     public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
-        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
-            return;
-        }
-        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(1);
-        buffer.writeUtf(modVersion);
-        buffer.writeUtf("neoforge");
-        buffer.writeUtf(SharedConstants.getCurrentVersion().name());
-        event.getConnection().send(new ServerboundCustomPayloadPacket(new HandshakePayload(buffer)));
+        event.getConnection().send(new ServerboundCustomPayloadPacket(new HandshakePayload(
+            1,
+            modVersion,
+            "neoforge",
+            SharedConstants.getCurrentVersion().name()
+        )));
     }
 
-    private record HandshakePayload(FriendlyByteBuf data) implements CustomPacketPayload {
+    private record HandshakePayload(
+        int protocolVersion,
+        String modVersion,
+        String loader,
+        String minecraftVersion
+    ) implements CustomPacketPayload {
         private static final CustomPacketPayload.Type<HandshakePayload> TYPE =
             new CustomPacketPayload.Type<>(HANDSHAKE_CHANNEL);
+        private static final StreamCodec<RegistryFriendlyByteBuf, HandshakePayload> CODEC =
+            CustomPacketPayload.codec(HandshakePayload::write, HandshakePayload::read);
+
+        private static HandshakePayload read(FriendlyByteBuf buffer) {
+            return new HandshakePayload(buffer.readByte(), buffer.readUtf(), buffer.readUtf(), buffer.readUtf());
+        }
+
+        private void write(FriendlyByteBuf buffer) {
+            buffer.writeByte(protocolVersion);
+            buffer.writeUtf(modVersion);
+            buffer.writeUtf(loader);
+            buffer.writeUtf(minecraftVersion);
+        }
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

@@ -1,7 +1,6 @@
 package net.enthusia.autoclicker.forge;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.netty.buffer.Unpooled;
 import java.nio.file.Path;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.client.AutoclickerRuntime;
@@ -9,7 +8,8 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -19,6 +19,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
 import org.lwjgl.glfw.GLFW;
 
 @Mod(EnthusiaAutoClickerForge.MOD_ID)
@@ -42,6 +44,13 @@ public final class EnthusiaAutoClickerForge {
     );
     private static AutoclickerRuntime runtime;
     private static String modVersion = "unknown";
+    private static final Channel<CustomPacketPayload> HANDSHAKE_NETWORK = ChannelBuilder.named(HANDSHAKE_CHANNEL)
+        .optional()
+        .payloadChannel()
+        .play()
+        .serverbound()
+        .add(HandshakePayload.TYPE, HandshakePayload.CODEC, (payload, context) -> {})
+        .build();
 
     public EnthusiaAutoClickerForge(ModContainer container) {
         modVersion = container.getModInfo().getVersion().toString();
@@ -78,20 +87,35 @@ public final class EnthusiaAutoClickerForge {
     }
 
     private static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
-        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
-            return;
-        }
-        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-        buffer.writeByte(1);
-        buffer.writeUtf(modVersion);
-        buffer.writeUtf("forge");
-        buffer.writeUtf(SharedConstants.getCurrentVersion().name());
-        event.getConnection().send(new ServerboundCustomPayloadPacket(new HandshakePayload(buffer)));
+        HANDSHAKE_NETWORK.send(new HandshakePayload(
+            1,
+            modVersion,
+            "forge",
+            SharedConstants.getCurrentVersion().name()
+        ), event.getConnection());
     }
 
-    private record HandshakePayload(FriendlyByteBuf data) implements CustomPacketPayload {
+    private record HandshakePayload(
+        int protocolVersion,
+        String modVersion,
+        String loader,
+        String minecraftVersion
+    ) implements CustomPacketPayload {
         private static final CustomPacketPayload.Type<HandshakePayload> TYPE =
             new CustomPacketPayload.Type<>(HANDSHAKE_CHANNEL);
+        private static final StreamCodec<RegistryFriendlyByteBuf, HandshakePayload> CODEC =
+            CustomPacketPayload.codec(HandshakePayload::write, HandshakePayload::read);
+
+        private static HandshakePayload read(FriendlyByteBuf buffer) {
+            return new HandshakePayload(buffer.readByte(), buffer.readUtf(), buffer.readUtf(), buffer.readUtf());
+        }
+
+        private void write(FriendlyByteBuf buffer) {
+            buffer.writeByte(protocolVersion);
+            buffer.writeUtf(modVersion);
+            buffer.writeUtf(loader);
+            buffer.writeUtf(minecraftVersion);
+        }
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
