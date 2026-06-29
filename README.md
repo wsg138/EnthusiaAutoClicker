@@ -63,8 +63,8 @@ Click intervals support decimal tick values and cannot be configured below 12.5 
 - Inventory scans are limited to once per second while the relevant automation is enabled.
 - The autoclicker disables on world exit, and GUI time does not count toward the armor-stand delay.
 - A newly started right-click hold or right click takes priority over left click for that tick.
-- The mod does not construct vanilla gameplay packet objects. It sends one private handshake
-  plugin message so the optional server plugin can detect updated client jars.
+- The mod does not construct vanilla gameplay packet objects. The private server-plugin handshake is
+  currently disabled by default while the newer custom payload encoders are reworked.
 - The mod does not run without a loaded player, level, and client game mode.
 
 This behavior is intended to avoid malformed or impossible protocol sequences. Server owners

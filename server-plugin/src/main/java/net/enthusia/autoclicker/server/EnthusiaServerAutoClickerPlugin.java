@@ -14,6 +14,8 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private int minimumFixedIntervalTicks;
     private int internalCombatDurationTicks;
     private boolean requireCombatX;
+    private boolean requireLineOfSight;
+    private boolean swingWhenNoTarget;
     private boolean stopWhenNoTarget;
     private boolean stopOnTeleport;
 
@@ -58,10 +60,12 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private void reloadSettings() {
         maxMovementBlocks = Math.max(0.0D, getConfig().getDouble("max-movement-blocks", 0.75D));
         attackRangeBlocks = Math.max(0.1D, getConfig().getDouble("attack-range-blocks", 3.0D));
-        raySizeBlocks = Math.max(0.0D, getConfig().getDouble("ray-size-blocks", 0.15D));
+        raySizeBlocks = Math.max(0.35D, getConfig().getDouble("ray-size-blocks", 0.35D));
         minimumFixedIntervalTicks = Math.max(1, getConfig().getInt("minimum-fixed-interval-ticks", 1));
         internalCombatDurationTicks = Math.max(1, getConfig().getInt("internal-combat-duration-ticks", 200));
         requireCombatX = getConfig().getBoolean("require-combatx", false);
+        requireLineOfSight = getConfig().getBoolean("require-line-of-sight", false);
+        swingWhenNoTarget = getConfig().getBoolean("swing-when-no-target", true);
         stopWhenNoTarget = getConfig().getBoolean("stop-when-no-target", false);
         stopOnTeleport = getConfig().getBoolean("stop-on-teleport", true);
     }
@@ -88,6 +92,14 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
 
     boolean requireCombatX() {
         return requireCombatX;
+    }
+
+    boolean requireLineOfSight() {
+        return requireLineOfSight;
+    }
+
+    boolean swingWhenNoTarget() {
+        return swingWhenNoTarget;
     }
 
     boolean stopWhenNoTarget() {

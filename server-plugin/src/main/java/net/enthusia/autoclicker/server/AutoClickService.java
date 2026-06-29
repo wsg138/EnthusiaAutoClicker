@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -38,7 +39,7 @@ final class AutoClickService {
             AutoClickMode.COOLDOWN,
             0
         ));
-        player.sendMessage("AutoClicker enabled: cooldown mode.");
+        player.sendMessage(message(ChatColor.GREEN, "enabled", "cooldown mode"));
     }
 
     void enableFixed(Player player, int intervalTicks) {
@@ -48,13 +49,13 @@ final class AutoClickService {
             AutoClickMode.FIXED_INTERVAL,
             intervalTicks
         ));
-        player.sendMessage("AutoClicker enabled: every " + intervalTicks + " ticks.");
+        player.sendMessage(message(ChatColor.GREEN, "enabled", "every " + intervalTicks + " ticks"));
     }
 
     void disable(Player player, String reason) {
         AutoClickSession removed = sessions.remove(player.getUniqueId());
         if (removed != null && reason != null && !reason.isBlank()) {
-            player.sendMessage("AutoClicker stopped: " + reason);
+            player.sendMessage(message(ChatColor.RED, "stopped", reason));
         }
     }
 
@@ -69,12 +70,12 @@ final class AutoClickService {
     String status(Player player) {
         AutoClickSession session = sessions.get(player.getUniqueId());
         if (session == null) {
-            return "AutoClicker is off.";
+            return message(ChatColor.RED, "off", "");
         }
         if (session.mode() == AutoClickMode.COOLDOWN) {
-            return "AutoClicker is on: cooldown mode.";
+            return message(ChatColor.GREEN, "on", "cooldown mode");
         }
-        return "AutoClicker is on: every " + session.intervalTicks() + " ticks.";
+        return message(ChatColor.GREEN, "on", "every " + session.intervalTicks() + " ticks");
     }
 
     void tick() {
@@ -117,6 +118,8 @@ final class AutoClickService {
         if (target == null) {
             if (plugin.stopWhenNoTarget()) {
                 disable(player, "no valid target");
+            } else if (plugin.swingWhenNoTarget()) {
+                player.swingMainHand();
             }
             return;
         }
@@ -171,7 +174,7 @@ final class AutoClickService {
         return !entity.getUniqueId().equals(player.getUniqueId())
             && entity.isValid()
             && !livingEntity.isDead()
-            && player.hasLineOfSight(entity);
+            && (!plugin.requireLineOfSight() || player.hasLineOfSight(entity));
     }
 
     private void attack(Player player, LivingEntity target) {
@@ -193,5 +196,13 @@ final class AutoClickService {
                 sessions.remove(playerId);
             }
         }
+    }
+
+    private String message(ChatColor statusColor, String status, String detail) {
+        String base = ChatColor.GOLD + "AutoClicker " + statusColor + status;
+        if (detail == null || detail.isBlank()) {
+            return base + ChatColor.GOLD + ".";
+        }
+        return base + ChatColor.GRAY + ": " + ChatColor.WHITE + detail + ChatColor.GRAY + ".";
     }
 }

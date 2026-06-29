@@ -5,7 +5,7 @@ max-movement-blocks: 0.75
 attack-range-blocks: 3.0
 
 # Small ray size makes targeting feel closer to a real crosshair click without requiring perfect geometry.
-ray-size-blocks: 0.15
+ray-size-blocks: 0.35
 
 # Minimum accepted fixed interval for /autoclick <ticks>.
 minimum-fixed-interval-ticks: 1
@@ -16,6 +16,13 @@ require-combatx: false
 
 # Fallback PvP combat duration when CombatX cannot be hooked or when a player is exempt from CombatX tagging.
 internal-combat-duration-ticks: 200
+
+# If true, Bukkit line-of-sight must be clear before attacking.
+# This can block attacks through trapdoors, slabs, and other partial blocks.
+require-line-of-sight: false
+
+# If true, swing the main hand on each ready click even when no valid mob is under the crosshair.
+swing-when-no-target: true
 
 # If true, stop when there is no valid non-player target under the crosshair.
 stop-when-no-target: false

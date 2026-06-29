@@ -64,6 +64,9 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
     }
 
     private static void sendHandshake() {
+        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
+            return;
+        }
         FriendlyByteBuf buffer = PacketByteBufs.create();
         buffer.writeByte(1);
         buffer.writeUtf(FabricLoader.getInstance().getModContainer("enthusia_autoclicker")

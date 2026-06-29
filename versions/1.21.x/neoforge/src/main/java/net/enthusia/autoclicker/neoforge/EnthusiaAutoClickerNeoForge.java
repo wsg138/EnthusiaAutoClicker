@@ -81,6 +81,9 @@ public final class EnthusiaAutoClickerNeoForge {
 
     @SubscribeEvent
     public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
+            return;
+        }
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeByte(1);
         buffer.writeUtf(modVersion);

@@ -3,6 +3,7 @@ package net.enthusia.autoclicker.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,14 +38,18 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             return checkPlayer(sender, args);
         }
         if (!sender.hasPermission("enthusia.autoclicker.use")) {
-            sender.sendMessage("You do not have permission to use this command.");
+            sender.sendMessage(error("You do not have permission to use this command."));
             return true;
         }
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command.");
+            sender.sendMessage(error("Only players can use this command."));
             return true;
         }
         if (args.length == 0) {
+            if (service.isEnabled(player)) {
+                service.disable(player, "disabled");
+                return true;
+            }
             service.enableCooldown(player);
             return true;
         }
@@ -60,45 +65,51 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         try {
             int intervalTicks = Integer.parseInt(argument);
             if (intervalTicks < plugin.minimumFixedIntervalTicks()) {
-                player.sendMessage("Interval must be at least " + plugin.minimumFixedIntervalTicks() + " ticks.");
+                player.sendMessage(error("Interval must be at least " + plugin.minimumFixedIntervalTicks() + " ticks."));
                 return true;
             }
             service.enableFixed(player, intervalTicks);
             return true;
         } catch (NumberFormatException exception) {
-            player.sendMessage("Usage: /autoclick [ticks|off|status]");
+            player.sendMessage(ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/autoclick [ticks|off|status]");
             return true;
         }
     }
 
     private boolean checkPlayer(CommandSender sender, String[] args) {
         if (!sender.hasPermission("enthusia.autoclicker.check")) {
-            sender.sendMessage("You do not have permission to use this command.");
+            sender.sendMessage(error("You do not have permission to use this command."));
             return true;
         }
         if (args.length != 2) {
-            sender.sendMessage("Usage: /autoclick check <player>");
+            sender.sendMessage(ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/autoclick check <player>");
             return true;
         }
         Player target = plugin.getServer().getPlayerExact(args[1]);
         if (target == null) {
-            sender.sendMessage("Player not found: " + args[1]);
+            sender.sendMessage(error("Player not found: " + args[1]));
             return true;
         }
 
         Optional<ClientHandshake> handshake = handshakeService.handshake(target);
         if (handshake.isEmpty()) {
-            sender.sendMessage("AutoClicker mod check for " + target.getName() + ": NOT DETECTED");
-            sender.sendMessage("No private handshake has been received for this login session.");
+            sender.sendMessage(ChatColor.GOLD + "AutoClicker mod check for " + ChatColor.WHITE
+                + target.getName() + ChatColor.GRAY + ": " + ChatColor.RED + "NOT DETECTED");
+            sender.sendMessage(ChatColor.GRAY + "No private handshake has been received for this login session.");
             return true;
         }
         ClientHandshake detected = handshake.get();
-        sender.sendMessage("AutoClicker mod check for " + target.getName() + ": DETECTED");
-        sender.sendMessage("Mod version: " + detected.modVersion());
-        sender.sendMessage("Loader: " + detected.loader());
-        sender.sendMessage("Minecraft: " + detected.minecraftVersion());
-        sender.sendMessage("Received: " + detected.receivedAt());
+        sender.sendMessage(ChatColor.GOLD + "AutoClicker mod check for " + ChatColor.WHITE
+            + target.getName() + ChatColor.GRAY + ": " + ChatColor.GREEN + "DETECTED");
+        sender.sendMessage(ChatColor.GRAY + "Mod version: " + ChatColor.WHITE + detected.modVersion());
+        sender.sendMessage(ChatColor.GRAY + "Loader: " + ChatColor.WHITE + detected.loader());
+        sender.sendMessage(ChatColor.GRAY + "Minecraft: " + ChatColor.WHITE + detected.minecraftVersion());
+        sender.sendMessage(ChatColor.GRAY + "Received: " + ChatColor.WHITE + detected.receivedAt());
         return true;
+    }
+
+    private String error(String message) {
+        return ChatColor.RED + message;
     }
 
     @Override

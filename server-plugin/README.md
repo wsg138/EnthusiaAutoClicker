@@ -16,10 +16,12 @@ events, and other server-side combat rules.
 ## Commands
 
 - `/autoclick` enables cooldown mode. The plugin attacks when the held item's attack cooldown is ready.
+  Running `/autoclick` again toggles it off.
 - `/autoclick <ticks>` enables fixed interval mode. Example: `/autoclick 20`
 - `/autoclick off` disables it.
 - `/autoclick status` shows the current mode.
 - `/autoclick check <player>` silently checks whether the client mod completed its private handshake.
+  Current client jars disable that handshake by default to avoid login disconnects.
 
 ## Safety
 
@@ -29,12 +31,18 @@ events, and other server-side combat rules.
 - If CombatX cannot be hooked, falls back to a built-in PvP damage tracker.
 - Stops if the player moves farther than the configured movement limit from the activation point.
 - Stops on death, quit, world change, teleport, game mode changes, or target loss depending on config.
+- By default, targeting is allowed through partial blocks because Bukkit line-of-sight checks are too strict
+  for trapdoors and slabs.
 
 ## Mod Checks
 
 The check command is intentionally silent to the target player. It only reports `DETECTED` after the
 client mod sends a private plugin-message handshake on `enthusia_autoclicker:handshake`. The command
 does not use client brand strings or passive plugin-channel guessing.
+
+The current client jars do not send this handshake by default because the newer custom payload encoders
+need a safer per-version implementation. Until that is restored, `/autoclick check <player>` will usually
+report `NOT DETECTED`.
 
 ## Build
 

@@ -75,6 +75,9 @@ public final class EnthusiaAutoClickerForge {
 
     @SubscribeEvent
     public void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        if (!Boolean.getBoolean("enthusia.autoclicker.handshake")) {
+            return;
+        }
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeByte(1);
         buffer.writeUtf(ModList.get().getModContainerById(MOD_ID)
