@@ -120,6 +120,7 @@ final class AutoClickService {
                 disable(player, "no valid target");
             } else if (plugin.swingWhenNoTarget()) {
                 player.swingMainHand();
+                player.resetCooldown();
             }
             return;
         }

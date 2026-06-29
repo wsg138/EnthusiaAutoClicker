@@ -93,18 +93,10 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
 
         Optional<ClientHandshake> handshake = handshakeService.handshake(target);
         if (handshake.isEmpty()) {
-            sender.sendMessage(ChatColor.GOLD + "AutoClicker mod check for " + ChatColor.WHITE
-                + target.getName() + ChatColor.GRAY + ": " + ChatColor.RED + "NOT DETECTED");
-            sender.sendMessage(ChatColor.GRAY + "No private handshake has been received for this login session.");
+            sender.sendMessage(ChatColor.RED + "Not detected.");
             return true;
         }
-        ClientHandshake detected = handshake.get();
-        sender.sendMessage(ChatColor.GOLD + "AutoClicker mod check for " + ChatColor.WHITE
-            + target.getName() + ChatColor.GRAY + ": " + ChatColor.GREEN + "DETECTED");
-        sender.sendMessage(ChatColor.GRAY + "Mod version: " + ChatColor.WHITE + detected.modVersion());
-        sender.sendMessage(ChatColor.GRAY + "Loader: " + ChatColor.WHITE + detected.loader());
-        sender.sendMessage(ChatColor.GRAY + "Minecraft: " + ChatColor.WHITE + detected.minecraftVersion());
-        sender.sendMessage(ChatColor.GRAY + "Received: " + ChatColor.WHITE + detected.receivedAt());
+        sender.sendMessage(ChatColor.GREEN + "Detected.");
         return true;
     }
 
