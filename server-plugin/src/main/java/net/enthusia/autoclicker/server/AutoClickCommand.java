@@ -2,6 +2,7 @@ package net.enthusia.autoclicker.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,16 +14,16 @@ import org.jetbrains.annotations.Nullable;
 final class AutoClickCommand implements CommandExecutor, TabCompleter {
     private final EnthusiaServerAutoClickerPlugin plugin;
     private final AutoClickService service;
-    private final ModCheckService modCheckService;
+    private final ClientHandshakeService handshakeService;
 
     AutoClickCommand(
         EnthusiaServerAutoClickerPlugin plugin,
         AutoClickService service,
-        ModCheckService modCheckService
+        ClientHandshakeService handshakeService
     ) {
         this.plugin = plugin;
         this.service = service;
-        this.modCheckService = modCheckService;
+        this.handshakeService = handshakeService;
     }
 
     @Override
@@ -85,19 +86,19 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        ModCheckResult result = modCheckService.check(target);
-        sender.sendMessage("AutoClicker mod check for " + target.getName() + ": " + result.status());
-        sender.sendMessage("Brand: " + result.clientBrand());
-        sender.sendMessage("Relevant channels: " + formatChannels(result.relevantChannels()));
-        sender.sendMessage(result.detail());
-        if (result.status() != ModCheckStatus.DETECTED) {
-            sender.sendMessage("This is not proof the mod is absent. The current client mod does not provide a private server handshake.");
+        Optional<ClientHandshake> handshake = handshakeService.handshake(target);
+        if (handshake.isEmpty()) {
+            sender.sendMessage("AutoClicker mod check for " + target.getName() + ": NOT DETECTED");
+            sender.sendMessage("No private handshake has been received for this login session.");
+            return true;
         }
+        ClientHandshake detected = handshake.get();
+        sender.sendMessage("AutoClicker mod check for " + target.getName() + ": DETECTED");
+        sender.sendMessage("Mod version: " + detected.modVersion());
+        sender.sendMessage("Loader: " + detected.loader());
+        sender.sendMessage("Minecraft: " + detected.minecraftVersion());
+        sender.sendMessage("Received: " + detected.receivedAt());
         return true;
-    }
-
-    private String formatChannels(List<String> channels) {
-        return channels.isEmpty() ? "none" : String.join(", ", channels);
     }
 
     @Override

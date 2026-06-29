@@ -1,18 +1,25 @@
 package net.enthusia.autoclicker.forge;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.netty.buffer.Unpooled;
 import java.nio.file.Path;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.client.AutoclickerRuntime;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.lwjgl.glfw.GLFW;
@@ -21,6 +28,7 @@ import org.lwjgl.glfw.GLFW;
 public final class EnthusiaAutoClickerForge {
     public static final String MOD_ID = "enthusia_autoclicker";
     private static final String CATEGORY_KEY = "key.category.enthusia_autoclicker.main";
+    private static final ResourceLocation HANDSHAKE_CHANNEL = new ResourceLocation(MOD_ID, "handshake");
 
     private static final KeyMapping TOGGLE_KEY = new KeyMapping(
         "key.enthusia_autoclicker.toggle",
@@ -63,6 +71,18 @@ public final class EnthusiaAutoClickerForge {
                 runtime.tick(Minecraft.getInstance());
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+        buffer.writeByte(1);
+        buffer.writeUtf(ModList.get().getModContainerById(MOD_ID)
+            .map(container -> container.getModInfo().getVersion().toString())
+            .orElse("unknown"));
+        buffer.writeUtf("forge");
+        buffer.writeUtf(SharedConstants.getCurrentVersion().getName());
+        event.getConnection().send(new ServerboundCustomPayloadPacket(HANDSHAKE_CHANNEL, buffer));
     }
 
     public void onRegisterKeys(RegisterKeyMappingsEvent event) {

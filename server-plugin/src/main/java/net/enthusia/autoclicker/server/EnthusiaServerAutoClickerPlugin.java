@@ -6,7 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private CombatXHook combatX;
     private AutoClickService service;
-    private ModCheckService modCheckService;
+    private ClientHandshakeService handshakeService;
     private double maxMovementBlocks;
     private double attackRangeBlocks;
     private double raySizeBlocks;
@@ -25,15 +25,20 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         }
 
         service = new AutoClickService(this, combatX);
-        modCheckService = new ModCheckService();
-        AutoClickCommand commandExecutor = new AutoClickCommand(this, service, modCheckService);
+        handshakeService = new ClientHandshakeService();
+        getServer().getMessenger().registerIncomingPluginChannel(
+            this,
+            ClientHandshakeService.CHANNEL,
+            handshakeService
+        );
+        AutoClickCommand commandExecutor = new AutoClickCommand(this, service, handshakeService);
         PluginCommand command = getCommand("autoclick");
         if (command != null) {
             command.setExecutor(commandExecutor);
             command.setTabCompleter(commandExecutor);
         }
 
-        getServer().getPluginManager().registerEvents(new AutoClickListener(this, service), this);
+        getServer().getPluginManager().registerEvents(new AutoClickListener(this, service, handshakeService), this);
         getServer().getScheduler().runTaskTimer(this, service::tick, 1L, 1L);
     }
 
@@ -42,6 +47,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         if (service != null) {
             service.disableAll("plugin disabled");
         }
+        getServer().getMessenger().unregisterIncomingPluginChannel(this);
     }
 
     private void reloadSettings() {

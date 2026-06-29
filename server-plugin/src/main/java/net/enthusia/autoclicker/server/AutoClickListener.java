@@ -15,10 +15,16 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 final class AutoClickListener implements Listener {
     private final EnthusiaServerAutoClickerPlugin plugin;
     private final AutoClickService service;
+    private final ClientHandshakeService handshakeService;
 
-    AutoClickListener(EnthusiaServerAutoClickerPlugin plugin, AutoClickService service) {
+    AutoClickListener(
+        EnthusiaServerAutoClickerPlugin plugin,
+        AutoClickService service,
+        ClientHandshakeService handshakeService
+    ) {
         this.plugin = plugin;
         this.service = service;
+        this.handshakeService = handshakeService;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -37,6 +43,7 @@ final class AutoClickListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         service.disable(event.getPlayer(), "");
+        handshakeService.forget(event.getPlayer());
     }
 
     @EventHandler

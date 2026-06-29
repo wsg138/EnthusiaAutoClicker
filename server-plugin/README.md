@@ -19,7 +19,7 @@ events, and other server-side combat rules.
 - `/autoclick <ticks>` enables fixed interval mode. Example: `/autoclick 20`
 - `/autoclick off` disables it.
 - `/autoclick status` shows the current mode.
-- `/autoclick check <player>` silently checks server-visible client brand and plugin channel signals.
+- `/autoclick check <player>` silently checks whether the client mod completed its private handshake.
 
 ## Safety
 
@@ -31,10 +31,9 @@ events, and other server-side combat rules.
 
 ## Mod Checks
 
-The check command is intentionally silent to the target player. It can only use information already
-visible to the server, such as the client brand and registered plugin channels. Without a client-side
-handshake in the mod, this cannot prove the mod is absent; it can only report `DETECTED`,
-`LOADER_ONLY`, or `UNKNOWN`.
+The check command is intentionally silent to the target player. It only reports `DETECTED` after the
+client mod sends a private plugin-message handshake on `enthusia_autoclicker:handshake`. The command
+does not use client brand strings or passive plugin-channel guessing.
 
 ## Build
 
