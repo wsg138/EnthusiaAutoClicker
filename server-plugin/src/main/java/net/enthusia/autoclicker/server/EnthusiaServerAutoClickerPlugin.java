@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private CombatXHook combatX;
     private AutoClickService service;
+    private ModCheckService modCheckService;
     private double maxMovementBlocks;
     private double attackRangeBlocks;
     private double raySizeBlocks;
@@ -24,7 +25,8 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         }
 
         service = new AutoClickService(this, combatX);
-        AutoClickCommand commandExecutor = new AutoClickCommand(this, service);
+        modCheckService = new ModCheckService();
+        AutoClickCommand commandExecutor = new AutoClickCommand(this, service, modCheckService);
         PluginCommand command = getCommand("autoclick");
         if (command != null) {
             command.setExecutor(commandExecutor);

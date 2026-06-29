@@ -13,10 +13,16 @@ import org.jetbrains.annotations.Nullable;
 final class AutoClickCommand implements CommandExecutor, TabCompleter {
     private final EnthusiaServerAutoClickerPlugin plugin;
     private final AutoClickService service;
+    private final ModCheckService modCheckService;
 
-    AutoClickCommand(EnthusiaServerAutoClickerPlugin plugin, AutoClickService service) {
+    AutoClickCommand(
+        EnthusiaServerAutoClickerPlugin plugin,
+        AutoClickService service,
+        ModCheckService modCheckService
+    ) {
         this.plugin = plugin;
         this.service = service;
+        this.modCheckService = modCheckService;
     }
 
     @Override
@@ -26,6 +32,13 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         @NotNull String label,
         @NotNull String[] args
     ) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("check")) {
+            return checkPlayer(sender, args);
+        }
+        if (!sender.hasPermission("enthusia.autoclicker.use")) {
+            sender.sendMessage("You do not have permission to use this command.");
+            return true;
+        }
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can use this command.");
             return true;
@@ -57,6 +70,36 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private boolean checkPlayer(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("enthusia.autoclicker.check")) {
+            sender.sendMessage("You do not have permission to use this command.");
+            return true;
+        }
+        if (args.length != 2) {
+            sender.sendMessage("Usage: /autoclick check <player>");
+            return true;
+        }
+        Player target = plugin.getServer().getPlayerExact(args[1]);
+        if (target == null) {
+            sender.sendMessage("Player not found: " + args[1]);
+            return true;
+        }
+
+        ModCheckResult result = modCheckService.check(target);
+        sender.sendMessage("AutoClicker mod check for " + target.getName() + ": " + result.status());
+        sender.sendMessage("Brand: " + result.clientBrand());
+        sender.sendMessage("Relevant channels: " + formatChannels(result.relevantChannels()));
+        sender.sendMessage(result.detail());
+        if (result.status() != ModCheckStatus.DETECTED) {
+            sender.sendMessage("This is not proof the mod is absent. The current client mod does not provide a private server handshake.");
+        }
+        return true;
+    }
+
+    private String formatChannels(List<String> channels) {
+        return channels.isEmpty() ? "none" : String.join(", ", channels);
+    }
+
     @Override
     public @Nullable List<String> onTabComplete(
         @NotNull CommandSender sender,
@@ -64,11 +107,23 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         @NotNull String alias,
         @NotNull String[] args
     ) {
+        if (args.length == 1) {
+            List<String> options = new ArrayList<>(List.of("off", "status", "check", "20"));
+            options.removeIf(option -> !option.startsWith(args[0].toLowerCase()));
+            return options;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("check")
+            && sender.hasPermission("enthusia.autoclicker.check")) {
+            List<String> names = new ArrayList<>();
+            for (Player player : plugin.getServer().getOnlinePlayers()) {
+                names.add(player.getName());
+            }
+            names.removeIf(name -> !name.toLowerCase().startsWith(args[1].toLowerCase()));
+            return names;
+        }
         if (args.length != 1) {
             return List.of();
         }
-        List<String> options = new ArrayList<>(List.of("off", "status", "20"));
-        options.removeIf(option -> !option.startsWith(args[0].toLowerCase()));
-        return options;
+        return List.of();
     }
 }

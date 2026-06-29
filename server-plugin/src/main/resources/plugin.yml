@@ -8,9 +8,11 @@ softdepend:
 commands:
   autoclick:
     description: Toggle or configure the server-side autoclicker.
-    usage: /autoclick [ticks|off|status]
-    permission: enthusia.autoclicker.use
+    usage: /autoclick [ticks|off|status|check <player>]
 permissions:
   enthusia.autoclicker.use:
     description: Allows use of the server-side autoclicker.
     default: true
+  enthusia.autoclicker.check:
+    description: Allows silent server-side checks for detectable client mod signals.
+    default: op
