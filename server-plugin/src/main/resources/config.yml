@@ -10,6 +10,13 @@ ray-size-blocks: 0.15
 # Minimum accepted fixed interval for /autoclick <ticks>.
 minimum-fixed-interval-ticks: 1
 
+# If true, autoclicking is blocked unless the CombatX API hook is available.
+# If false, the plugin still uses CombatX when available and falls back to its own PvP tracker when CombatX cannot be hooked.
+require-combatx: false
+
+# Fallback PvP combat duration when CombatX cannot be hooked or when a player is exempt from CombatX tagging.
+internal-combat-duration-ticks: 200
+
 # If true, stop when there is no valid non-player target under the crosshair.
 stop-when-no-target: false
 

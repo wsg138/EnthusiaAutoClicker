@@ -10,7 +10,7 @@ events, and other server-side combat rules.
 
 - Paper or a Paper-compatible server
 - Java 17+
-- CombatX installed and enabled
+- CombatX installed and enabled, or the built-in PvP combat fallback enabled
 - Geyser/Floodgate players are supported because the plugin acts on the server-side `Player`
 
 ## Commands
@@ -26,6 +26,7 @@ events, and other server-side combat rules.
 - Never targets players.
 - Cancels and stops if an auto-attack would damage a player, including sweeping damage.
 - Stops while CombatX reports the player is in combat.
+- If CombatX cannot be hooked, falls back to a built-in PvP damage tracker.
 - Stops if the player moves farther than the configured movement limit from the activation point.
 - Stops on death, quit, world change, teleport, game mode changes, or target loss depending on config.
 

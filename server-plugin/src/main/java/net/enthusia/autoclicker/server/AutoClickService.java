@@ -17,12 +17,18 @@ import org.bukkit.util.Vector;
 final class AutoClickService {
     private final EnthusiaServerAutoClickerPlugin plugin;
     private final CombatXHook combatX;
+    private final InternalCombatTracker internalCombatTracker;
     private final Map<UUID, AutoClickSession> sessions = new HashMap<>();
     private final Set<UUID> attackingPlayers = new HashSet<>();
 
-    AutoClickService(EnthusiaServerAutoClickerPlugin plugin, CombatXHook combatX) {
+    AutoClickService(
+        EnthusiaServerAutoClickerPlugin plugin,
+        CombatXHook combatX,
+        InternalCombatTracker internalCombatTracker
+    ) {
         this.plugin = plugin;
         this.combatX = combatX;
+        this.internalCombatTracker = internalCombatTracker;
     }
 
     void enableCooldown(Player player) {
@@ -72,6 +78,7 @@ final class AutoClickService {
     }
 
     void tick() {
+        internalCombatTracker.cleanupExpired();
         for (UUID playerId : Set.copyOf(sessions.keySet())) {
             Player player = plugin.getServer().getPlayer(playerId);
             AutoClickSession session = sessions.get(playerId);
@@ -84,11 +91,11 @@ final class AutoClickService {
     }
 
     private void tick(Player player, AutoClickSession session) {
-        if (!combatX.isAvailable()) {
+        if (plugin.requireCombatX() && !combatX.isAvailable()) {
             disable(player, "CombatX is unavailable");
             return;
         }
-        if (combatX.isInCombat(player)) {
+        if (combatX.isInCombat(player) || internalCombatTracker.isInCombat(player)) {
             disable(player, "you are in combat");
             return;
         }

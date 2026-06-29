@@ -47,12 +47,13 @@ final class CombatXHook {
 
     boolean isInCombat(Player player) {
         if (!isAvailable()) {
-            return true;
+            return false;
         }
         try {
             Object result = isInCombatMethod.invoke(null, player);
             return result instanceof Boolean combat && combat;
         } catch (IllegalAccessException | InvocationTargetException exception) {
+            owner.getLogger().warning("CombatX combat check failed for " + player.getName() + ". Blocking autoclicking for this tick.");
             return true;
         }
     }
