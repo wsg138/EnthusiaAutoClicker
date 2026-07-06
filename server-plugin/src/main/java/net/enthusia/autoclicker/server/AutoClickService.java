@@ -8,10 +8,17 @@ import java.util.UUID;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.ChatColor;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.World;
+import org.bukkit.entity.Ambient;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
+import org.bukkit.entity.WaterMob;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
@@ -87,7 +94,16 @@ final class AutoClickService {
                 sessions.remove(playerId);
                 continue;
             }
-            tick(player, session);
+            try {
+                tick(player, session);
+            } catch (RuntimeException exception) {
+                sessions.remove(playerId);
+                plugin.getLogger().log(java.util.logging.Level.SEVERE,
+                    "Disabled autoclicking for " + player.getName() + " after a session tick failure.",
+                    exception
+                );
+                player.sendMessage(message(ChatColor.RED, "stopped", "internal error"));
+            }
         }
     }
 
@@ -102,6 +118,10 @@ final class AutoClickService {
         }
         if (!canUse(player)) {
             disable(player, "you cannot attack right now");
+            return;
+        }
+        if (plugin.stopWhenInventoryOpen() && hasBlockingInventoryOpen(player)) {
+            disable(player, "inventory or menu opened");
             return;
         }
         if (movedTooFar(player, session)) {
@@ -120,7 +140,6 @@ final class AutoClickService {
                 disable(player, "no valid target");
             } else if (plugin.swingWhenNoTarget()) {
                 player.swingMainHand();
-                player.resetCooldown();
             }
             return;
         }
@@ -133,6 +152,11 @@ final class AutoClickService {
             && player.isValid()
             && player.getGameMode() != GameMode.SPECTATOR
             && player.getGameMode() != GameMode.CREATIVE;
+    }
+
+    private boolean hasBlockingInventoryOpen(Player player) {
+        InventoryType type = player.getOpenInventory().getType();
+        return type != InventoryType.CRAFTING;
     }
 
     private boolean movedTooFar(Player player, AutoClickSession session) {
@@ -165,7 +189,29 @@ final class AutoClickService {
         if (result == null || !(result.getHitEntity() instanceof LivingEntity livingEntity)) {
             return null;
         }
+        if (plugin.preventAttackingThroughBlocks() && isBlockedByTerrain(player, eye, direction, result)) {
+            return null;
+        }
         return livingEntity;
+    }
+
+    private boolean isBlockedByTerrain(Player player, Location eye, Vector direction, RayTraceResult entityHit) {
+        Vector hitPosition = entityHit.getHitPosition();
+        if (hitPosition == null) {
+            return true;
+        }
+        double targetDistance = hitPosition.distance(eye.toVector());
+        if (targetDistance <= 0.0D) {
+            return false;
+        }
+        RayTraceResult blockHit = player.getWorld().rayTraceBlocks(
+            eye,
+            direction,
+            targetDistance,
+            FluidCollisionMode.NEVER,
+            plugin.allowThroughPassableBlocks()
+        );
+        return blockHit != null && blockHit.getHitBlock() != null;
     }
 
     private boolean isValidTarget(Player player, Entity entity) {
@@ -175,13 +221,40 @@ final class AutoClickService {
         return !entity.getUniqueId().equals(player.getUniqueId())
             && entity.isValid()
             && !livingEntity.isDead()
+            && targetFilterAllows(livingEntity)
             && (!plugin.requireLineOfSight() || player.hasLineOfSight(entity));
+    }
+
+    private boolean targetFilterAllows(LivingEntity entity) {
+        if (plugin.allowedTargetTypes().contains(entity.getType())) {
+            return true;
+        }
+        if (plugin.targetFilterMode() == EnthusiaServerAutoClickerPlugin.TargetFilterMode.ALLOWLIST
+            && !plugin.allowedTargetTypes().contains(entity.getType())) {
+            return false;
+        }
+        if (plugin.deniedTargetTypes().contains(entity.getType())) {
+            return false;
+        }
+        if (plugin.denyTamedAnimals() && entity instanceof Tameable tameable && tameable.isTamed()) {
+            return false;
+        }
+        return !plugin.denyPassiveAnimals() || !isPassiveMob(entity);
+    }
+
+    private boolean isPassiveMob(LivingEntity entity) {
+        return entity instanceof Animals
+            || entity instanceof WaterMob
+            || entity instanceof Ambient
+            || entity instanceof Golem;
     }
 
     private void attack(Player player, LivingEntity target) {
         attackingPlayers.add(player.getUniqueId());
         try {
             player.swingMainHand();
+            // Keep real attacks on the normal server path. Bukkit/Paper applies cooldown-scaled
+            // damage, durability, enchantments, sweeping, and cancellation through this call.
             player.attack(target);
         } finally {
             attackingPlayers.remove(player.getUniqueId());

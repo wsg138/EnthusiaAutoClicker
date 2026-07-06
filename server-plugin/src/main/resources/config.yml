@@ -1,13 +1,17 @@
 # Maximum distance, in blocks, a player can move from the activation point before autoclicking stops.
+# This keeps the tool stationary and prevents walking around while it attacks.
 max-movement-blocks: 0.75
 
 # Vanilla survival attack reach is about 3 blocks. Keep this conservative for Java and Bedrock parity.
 attack-range-blocks: 3.0
 
 # Small ray size makes targeting feel closer to a real crosshair click without requiring perfect geometry.
+# Larger values make target selection more forgiving.
 ray-size-blocks: 0.35
 
 # Minimum accepted fixed interval for /autoclick <ticks>.
+# Fixed interval mode may swing/attack faster than the vanilla attack cooldown.
+# Real target attacks still use player.attack(target), so Paper/vanilla applies cooldown-scaled damage.
 minimum-fixed-interval-ticks: 1
 
 # If true, autoclicking is blocked unless the CombatX API hook is available.
@@ -21,7 +25,32 @@ internal-combat-duration-ticks: 200
 # This can block attacks through trapdoors, slabs, and other partial blocks.
 require-line-of-sight: false
 
+# Prevent auto-attacks when a full block collision shape obstructs the ray to the target.
+# Keep this true for SMP release so mobs cannot be hit through walls.
+prevent-attacking-through-blocks: true
+
+# If true, passable blocks such as grass are ignored by the obstruction check.
+# Partial blocks still use their collision shapes, so a slab/trapdoor only blocks when the ray intersects it.
+allow-through-passable-blocks: true
+
+# If true, opening a chest, menu, villager trade, or other non-default inventory stops autoclicking.
+stop-when-inventory-open: true
+
+# Conservative SMP target filtering. DENYLIST allows hostile mobs by default while excluding
+# players, NPC-like entities, passive animals, and pets. ALLOWLIST only permits allowed-types.
+target-filter:
+  mode: DENYLIST
+  allowed-types: []
+  denied-types:
+    - ARMOR_STAND
+    - VILLAGER
+    - WANDERING_TRADER
+    - PLAYER
+  deny-tamed-animals: true
+  deny-passive-animals: true
+
 # If true, swing the main hand on each ready click even when no valid mob is under the crosshair.
+# Empty swings do not reset attack cooldown.
 swing-when-no-target: true
 
 # If true, stop when there is no valid non-player target under the crosshair.

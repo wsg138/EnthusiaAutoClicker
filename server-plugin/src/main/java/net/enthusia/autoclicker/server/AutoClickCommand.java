@@ -1,5 +1,6 @@
 package net.enthusia.autoclicker.server;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,9 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
     ) {
         if (args.length > 0 && args[0].equalsIgnoreCase("check")) {
             return checkPlayer(sender, args);
+        }
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            return reload(sender);
         }
         if (!sender.hasPermission("enthusia.autoclicker.use")) {
             sender.sendMessage(error("You do not have permission to use this command."));
@@ -76,6 +80,17 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    private boolean reload(CommandSender sender) {
+        if (!sender.hasPermission("enthusia.autoclicker.admin")) {
+            sender.sendMessage(error("You do not have permission to reload this plugin."));
+            return true;
+        }
+        plugin.reloadSettingsForCommand();
+        service.disableAll("configuration reloaded");
+        sender.sendMessage(ChatColor.GREEN + "Enthusia AutoClicker configuration reloaded. Active sessions were stopped.");
+        return true;
+    }
+
     private boolean checkPlayer(CommandSender sender, String[] args) {
         if (!sender.hasPermission("enthusia.autoclicker.check")) {
             sender.sendMessage(error("You do not have permission to use this command."));
@@ -96,11 +111,19 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.GOLD + "Enthusia AutoClicker was " + ChatColor.RED
                 + "NOT DETECTED" + ChatColor.GOLD + " for " + ChatColor.WHITE + target.getName()
                 + ChatColor.GOLD + ".");
+            sender.sendMessage(ChatColor.GRAY + "This is a convenience signal, not secure proof of the exact client mod.");
             return true;
         }
+        ClientHandshake detected = handshake.get();
         sender.sendMessage(ChatColor.GOLD + "Enthusia AutoClicker was " + ChatColor.GREEN
             + "DETECTED" + ChatColor.GOLD + " for " + ChatColor.WHITE + target.getName()
             + ChatColor.GOLD + ".");
+        sender.sendMessage(ChatColor.GRAY + "Mod version: " + ChatColor.WHITE + detected.modVersion());
+        sender.sendMessage(ChatColor.GRAY + "Loader: " + ChatColor.WHITE + detected.loader());
+        sender.sendMessage(ChatColor.GRAY + "Minecraft: " + ChatColor.WHITE + detected.minecraftVersion());
+        sender.sendMessage(ChatColor.GRAY + "Received: " + ChatColor.WHITE
+            + DateTimeFormatter.ISO_INSTANT.format(detected.receivedAt()));
+        sender.sendMessage(ChatColor.GRAY + "This is a convenience signal, not secure proof of the exact client mod.");
         return true;
     }
 
@@ -116,7 +139,7 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         @NotNull String[] args
     ) {
         if (args.length == 1) {
-            List<String> options = new ArrayList<>(List.of("off", "status", "check", "20"));
+            List<String> options = new ArrayList<>(List.of("off", "status", "check", "reload", "20"));
             options.removeIf(option -> !option.startsWith(args[0].toLowerCase()));
             return options;
         }

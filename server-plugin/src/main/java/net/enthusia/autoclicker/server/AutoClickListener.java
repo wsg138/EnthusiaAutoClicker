@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -67,6 +68,16 @@ final class AutoClickListener implements Listener {
     public void onGameModeChange(PlayerGameModeChangeEvent event) {
         if (service.isEnabled(event.getPlayer())) {
             service.disable(event.getPlayer(), "game mode changed");
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        if (!plugin.stopWhenInventoryOpen() || !(event.getPlayer() instanceof Player player)) {
+            return;
+        }
+        if (service.isEnabled(player)) {
+            service.disable(player, "inventory or menu opened");
         }
     }
 }

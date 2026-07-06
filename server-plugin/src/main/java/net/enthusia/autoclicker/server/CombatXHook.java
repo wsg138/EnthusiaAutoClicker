@@ -10,14 +10,18 @@ final class CombatXHook {
     private static final String COMBAT_MANAGER_CLASS = "net.sparkomc.combatx.CombatManager";
     private static final String COMBAT_MANAGER_RESOURCE = "net/sparkomc/combatx/CombatManager.class";
 
-    private Plugin owner;
+    private EnthusiaServerAutoClickerPlugin owner;
     private Method isInCombatMethod;
     private boolean available;
     private boolean warnedUnavailable;
 
-    boolean initialize(Plugin plugin) {
+    boolean initialize(EnthusiaServerAutoClickerPlugin plugin) {
         owner = plugin;
         return refresh();
+    }
+
+    void resetAvailabilityWarning() {
+        warnedUnavailable = false;
     }
 
     boolean refresh() {
@@ -34,7 +38,11 @@ final class CombatXHook {
         }
         available = false;
         if (!warnedUnavailable) {
-            owner.getLogger().warning("CombatX API could not be found. Autoclicking will stay blocked.");
+            if (owner.requireCombatX()) {
+                owner.getLogger().warning("CombatX API could not be found. Autoclicking will stay blocked.");
+            } else {
+                owner.getLogger().info("CombatX API could not be found. Internal PvP fallback tracking is active.");
+            }
             owner.getLogger().warning("Loaded plugins: " + loadedPluginNames());
             warnedUnavailable = true;
         }

@@ -1,7 +1,12 @@
 package net.enthusia.autoclicker.server;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.EnumSet;
+import java.util.Locale;
+import java.util.Set;
 
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private CombatXHook combatX;
@@ -15,9 +20,17 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private int internalCombatDurationTicks;
     private boolean requireCombatX;
     private boolean requireLineOfSight;
+    private boolean preventAttackingThroughBlocks;
+    private boolean allowThroughPassableBlocks;
+    private boolean stopWhenInventoryOpen;
     private boolean swingWhenNoTarget;
     private boolean stopWhenNoTarget;
     private boolean stopOnTeleport;
+    private TargetFilterMode targetFilterMode;
+    private Set<EntityType> allowedTargetTypes;
+    private Set<EntityType> deniedTargetTypes;
+    private boolean denyTamedAnimals;
+    private boolean denyPassiveAnimals;
 
     @Override
     public void onEnable() {
@@ -25,9 +38,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         reloadSettings();
 
         combatX = new CombatXHook();
-        if (!combatX.initialize(this)) {
-            getLogger().warning("CombatX could not be hooked. Falling back to the plugin's internal PvP combat tracker.");
-        }
+        combatX.initialize(this);
 
         internalCombatTracker = new InternalCombatTracker(this);
         service = new AutoClickService(this, combatX, internalCombatTracker);
@@ -65,9 +76,38 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         internalCombatDurationTicks = Math.max(1, getConfig().getInt("internal-combat-duration-ticks", 200));
         requireCombatX = getConfig().getBoolean("require-combatx", false);
         requireLineOfSight = getConfig().getBoolean("require-line-of-sight", false);
+        preventAttackingThroughBlocks = getConfig().getBoolean("prevent-attacking-through-blocks", true);
+        allowThroughPassableBlocks = getConfig().getBoolean("allow-through-passable-blocks", true);
+        stopWhenInventoryOpen = getConfig().getBoolean("stop-when-inventory-open", true);
         swingWhenNoTarget = getConfig().getBoolean("swing-when-no-target", true);
         stopWhenNoTarget = getConfig().getBoolean("stop-when-no-target", false);
         stopOnTeleport = getConfig().getBoolean("stop-on-teleport", true);
+        targetFilterMode = TargetFilterMode.from(getConfig().getString("target-filter.mode", "DENYLIST"));
+        allowedTargetTypes = parseEntityTypes("target-filter.allowed-types");
+        deniedTargetTypes = parseEntityTypes("target-filter.denied-types");
+        denyTamedAnimals = getConfig().getBoolean("target-filter.deny-tamed-animals", true);
+        denyPassiveAnimals = getConfig().getBoolean("target-filter.deny-passive-animals", true);
+    }
+
+    void reloadSettingsForCommand() {
+        reloadConfig();
+        reloadSettings();
+        if (combatX != null) {
+            combatX.resetAvailabilityWarning();
+            combatX.refresh();
+        }
+    }
+
+    private Set<EntityType> parseEntityTypes(String path) {
+        Set<EntityType> types = EnumSet.noneOf(EntityType.class);
+        for (String configured : getConfig().getStringList(path)) {
+            try {
+                types.add(EntityType.valueOf(configured.trim().toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException exception) {
+                getLogger().warning("Ignoring unknown entity type in " + path + ": " + configured);
+            }
+        }
+        return types;
     }
 
     double maxMovementBlocks() {
@@ -98,6 +138,18 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         return requireLineOfSight;
     }
 
+    boolean preventAttackingThroughBlocks() {
+        return preventAttackingThroughBlocks;
+    }
+
+    boolean allowThroughPassableBlocks() {
+        return allowThroughPassableBlocks;
+    }
+
+    boolean stopWhenInventoryOpen() {
+        return stopWhenInventoryOpen;
+    }
+
     boolean swingWhenNoTarget() {
         return swingWhenNoTarget;
     }
@@ -108,5 +160,37 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
 
     boolean stopOnTeleport() {
         return stopOnTeleport;
+    }
+
+    TargetFilterMode targetFilterMode() {
+        return targetFilterMode;
+    }
+
+    Set<EntityType> allowedTargetTypes() {
+        return allowedTargetTypes;
+    }
+
+    Set<EntityType> deniedTargetTypes() {
+        return deniedTargetTypes;
+    }
+
+    boolean denyTamedAnimals() {
+        return denyTamedAnimals;
+    }
+
+    boolean denyPassiveAnimals() {
+        return denyPassiveAnimals;
+    }
+
+    enum TargetFilterMode {
+        ALLOWLIST,
+        DENYLIST;
+
+        static TargetFilterMode from(String value) {
+            if (value != null && value.equalsIgnoreCase("ALLOWLIST")) {
+                return ALLOWLIST;
+            }
+            return DENYLIST;
+        }
     }
 }
