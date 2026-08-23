@@ -1,70 +1,145 @@
 # Enthusia Server AutoClicker
 
-Server-side Paper plugin for simple automatic melee attacks.
+Server-side automatic melee attacks for Enthusia SMP. This is separate from the optional client mod in the repository root: **players do not need the client mod to use `/autoclick` on the SMP**, and the server-side command works for both Java and Bedrock players.
 
-This plugin does not spoof client packets. It uses Paper/Bukkit's player attack path so the
-server applies normal item damage, enchantments, cooldown behavior, fire aspect, sweeping, damage
-events, and other server-side combat rules.
+The plugin does not spoof client packets or apply custom damage. Real attacks use Paper/Bukkit's normal `player.attack(target)` path so normal item damage, enchantments, attack-cooldown scaling, durability, Fire Aspect, sweeping, damage events, and other server combat rules still apply.
 
-## Requirements
+## Using it on Enthusia
 
-- Paper or a Paper-compatible server
-- Java 17+
-- CombatX installed and enabled, or the built-in PvP combat fallback enabled
-- Geyser/Floodgate players are supported because the plugin acts on the server-side `Player`
+Ordinary players have permission to use the server autoclicker by default.
 
-## Commands
+```text
+/autoclick
+```
 
-- `/autoclick` enables cooldown mode. The plugin attacks when the held item's attack cooldown is ready.
-  Running `/autoclick` again toggles it off.
-- `/autoclick <ticks>` enables fixed interval mode. Example: `/autoclick 20`
-- `/autoclick off` disables it.
-- `/autoclick status` shows the current mode.
-- `/autoclick check <player>` silently checks whether the client mod completed its private handshake.
-- `/autoclick reload` reloads the plugin configuration and stops active sessions.
+Toggles **cooldown mode**. In this mode, the plugin attempts an attack whenever the player's normal attack cooldown is fully ready. Running `/autoclick` again turns it off.
 
-## Safety
+```text
+/autoclick <ticks>
+```
 
-- Never targets players.
-- Cancels and stops if an auto-attack would damage a player, including sweeping damage.
-- Uses normal `player.attack(target)` for real target attacks. Fast fixed interval mode can swing faster
-  than a tool's full attack cooldown, but Paper/vanilla still applies normal cooldown-scaled damage.
-- Does not apply custom damage and does not reset attack cooldown before real attacks.
-- Blocks attacks through full solid blocks by default while allowing safe passable/partial-block setups.
-- Stops when a player opens a chest, menu, trade, or other non-default inventory.
-- Excludes villagers, armor stands, tamed pets, passive animals, and players by default.
-- Stops while CombatX reports the player is in combat.
-- If CombatX cannot be hooked, falls back to a built-in PvP damage tracker.
-- Stops if the player moves farther than the configured movement limit from the activation point.
-- Stops on death, quit, world change, teleport, game mode changes, or target loss depending on config.
+Starts **fixed interval mode**. The number is the number of Minecraft ticks between attempts. There are 20 ticks per second, so for example:
 
-## Mod Checks
+| Command | Attempt interval |
+| --- | ---: |
+| `/autoclick 1` | every tick / up to 20 attempts per second |
+| `/autoclick 5` | every 0.25 seconds |
+| `/autoclick 10` | every 0.5 seconds |
+| `/autoclick 20` | every 1 second |
 
-The check command is intentionally silent to the target player. It only reports `DETECTED` after the
-client mod sends a private plugin-message handshake on `enthusia_autoclicker:handshake`. The command
-does not use client brand strings or passive plugin-channel guessing.
+Enthusia currently permits a minimum fixed interval of **1 tick**. Faster attempts do **not** bypass normal attack strength: actual hits still use the vanilla/Paper attack path, so attacking again before the weapon cooldown recovers produces the corresponding cooldown-scaled damage.
 
-Current client jars send this handshake during the play connection join phase. `/autoclick check <player>`
-reports whether Enthusia AutoClicker was detected for that player, including mod version, loader,
-Minecraft version, and received time when present. This is a convenience signal, not secure proof that
-the exact client mod is installed.
+Other player commands:
 
-## Manual QA Checklist
+```text
+/autoclick off
+/autoclick stop
+/autoclick disable
+/autoclick status
+```
 
-- Normal player can use `/autoclick` by default.
-- `/autoclick` toggles cooldown mode.
-- `/autoclick <ticks>` allows fast fixed interval mode.
-- Fast fixed interval mode does not do full cooldown damage every tick.
-- Plugin uses normal server attack behavior, not custom damage.
-- Autoclick stops or pauses when opening a chest/menu.
-- Autoclick cannot hit players directly.
-- Autoclick disables if an auto-attack would damage a player.
-- Autoclick cannot hit mobs through full solid blocks.
-- Autoclick can hit intended allowed mobs within range.
-- Autoclick refuses excluded targets like villagers, armor stands, pets, and passive mobs by default.
-- CombatX unavailable path works according to `require-combatx`.
-- `/autoclick reload` applies config changes.
-- `/autoclick check <player>` shows detected mod version, loader, and Minecraft version when present.
+`off`, `stop`, and `disable` are equivalent. `status` reports whether the autoclicker is off, in cooldown mode, or using a fixed interval.
+
+## What it targets
+
+The SMP configuration is intentionally aimed at hostile-mob farming rather than unattended PvP or passive-mob killing.
+
+The server autoclicker:
+
+- **never deliberately targets players**;
+- excludes armor stands, villagers, and wandering traders;
+- excludes tamed animals;
+- excludes passive animals, water mobs, ambient mobs, and golems by default;
+- can attack other valid living mobs under the player's crosshair;
+- uses a **3-block attack range**;
+- uses a small **0.35-block ray size** so targeting is slightly forgiving without becoming an area attack.
+
+When no valid target is under the crosshair, the current configuration lets the player continue swinging rather than automatically ending the session. Empty swings do not reset the player's attack cooldown.
+
+## Stationary farming and automatic stop conditions
+
+The command is designed as a mostly stationary farming aid, not a combat movement bot.
+
+When enabled, the activation position becomes the session anchor. On Enthusia, moving more than **0.75 blocks** from that point stops the autoclicker. Small movement inside that tolerance is allowed.
+
+The current SMP configuration also stops the autoclicker when the player:
+
+- enters PvP combat;
+- opens a chest, menu, villager trade, or other non-default inventory;
+- teleports or changes worlds;
+- dies or leaves the server;
+- changes into a game mode where the automated attack is not allowed;
+- moves too far from the activation point.
+
+A stopped session must be enabled again manually.
+
+### PvP safety
+
+The plugin checks CombatX when that integration is available and stops immediately if the player is combat-tagged. If CombatX cannot be used, Enthusia's configuration permits a built-in PvP damage tracker to act as the fallback; its current combat window is **10 seconds**.
+
+Auto-attacks are also guarded against player damage, including player damage caused indirectly by an automated attack such as sweeping behavior. The feature is intended for mobs, not PvP.
+
+## Walls and partial blocks
+
+The production configuration prevents attacks through obstructing block collision shapes.
+
+- Full solid walls stop target acquisition.
+- Passable blocks such as grass can be ignored.
+- Partial blocks such as slabs and trapdoors use their actual collision shapes, so they block an attack only when the attack ray intersects the collision geometry.
+
+This allows normal mob-farm windows while preventing the autoclicker from simply hitting mobs through walls.
+
+## Java and Bedrock
+
+The server feature operates on the server-side Bukkit `Player`, so it works for Java players and Geyser/Floodgate Bedrock players without installing anything client-side.
+
+The separate Enthusia AutoClicker client mod remains available for Java players who want its client-side left/right clicking, hold modes, food handling, durability guard, and other client features. Installing that mod is **not required** for the server `/autoclick` command.
+
+## Client-mod detection
+
+Staff can silently check whether the official client mod completed its private handshake:
+
+```text
+/autoclick check <player>
+```
+
+When detected, the check can report the mod version, loader, Minecraft version, and when the handshake was received. The target player is not notified.
+
+The handshake is a convenience signal only. It does not prove that the client is unmodified or that no other automation is installed.
+
+## Administrative command
+
+```text
+/autoclick reload
+```
+
+Reloads the server-plugin configuration and stops all currently active autoclick sessions.
+
+Permissions:
+
+- `enthusia.autoclicker.use` — player command; granted by default
+- `enthusia.autoclicker.check` — client-mod detection check; operator by default
+- `enthusia.autoclicker.admin` — configuration reload; operator by default
+
+## Current SMP configuration summary
+
+| Setting | Enthusia SMP |
+| --- | --- |
+| Maximum movement from activation point | 0.75 blocks |
+| Attack range | 3.0 blocks |
+| Target ray size | 0.35 blocks |
+| Minimum fixed interval | 1 tick |
+| CombatX strictly required | No; internal PvP fallback allowed |
+| Internal PvP fallback duration | 200 ticks / 10 seconds |
+| Block attacks through obstacles | Yes |
+| Allow ray through passable blocks | Yes |
+| Stop when inventory/menu opens | Yes |
+| Target players | No |
+| Target passive animals | No |
+| Target tamed animals | No |
+| Swing with no target | Yes |
+| Stop merely because no target exists | No |
+| Stop on teleport/world change | Yes |
 
 ## Build
 
@@ -72,4 +147,4 @@ the exact client mod is installed.
 mvn package
 ```
 
-The plugin jar is written to `target/EnthusiaServerAutoClicker.jar`.
+The plugin JAR is written to `target/EnthusiaServerAutoClicker.jar`.
