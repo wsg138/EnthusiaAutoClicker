@@ -1,19 +1,31 @@
 package net.enthusia.autoclicker.server;
 
-import java.time.Instant;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
+import net.enthusia.autoclicker.server.api.ClientHandshakeSnapshot;
+import net.enthusia.autoclicker.server.api.EnthusiaAutoClickerClientApi;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
 
-final class ClientHandshakeService implements PluginMessageListener {
+final class ClientHandshakeService implements PluginMessageListener, EnthusiaAutoClickerClientApi {
     static final String CHANNEL = "enthusia_autoclicker:handshake";
 
-    private final Map<UUID, ClientHandshake> handshakes = new HashMap<>();
+    private final Map<UUID, ClientHandshake> handshakes = new ConcurrentHashMap<>();
+    private final Clock clock;
+
+    ClientHandshakeService() {
+        this(Clock.systemUTC());
+    }
+
+    ClientHandshakeService(Clock clock) {
+        this.clock = Objects.requireNonNull(clock, "clock");
+    }
 
     @Override
     public void onPluginMessageReceived(
@@ -24,18 +36,43 @@ final class ClientHandshakeService implements PluginMessageListener {
         if (!CHANNEL.equals(channel)) {
             return;
         }
+        accept(player.getUniqueId(), message);
+    }
+
+    void accept(UUID playerId, byte[] message) {
+        Objects.requireNonNull(playerId, "playerId");
+        Objects.requireNonNull(message, "message");
         ClientHandshake handshake = parse(message);
         if (handshake != null) {
-            handshakes.put(player.getUniqueId(), handshake);
+            handshakes.put(playerId, handshake);
+        } else {
+            handshakes.remove(playerId);
         }
     }
 
     Optional<ClientHandshake> handshake(Player player) {
+        Objects.requireNonNull(player, "player");
         return Optional.ofNullable(handshakes.get(player.getUniqueId()));
     }
 
+    @Override
+    public Optional<ClientHandshakeSnapshot> handshake(UUID playerId) {
+        Objects.requireNonNull(playerId, "playerId");
+        return Optional.ofNullable(handshakes.get(playerId)).map(value -> new ClientHandshakeSnapshot(
+            value.modVersion(),
+            value.loader(),
+            value.minecraftVersion(),
+            value.receivedAt()
+        ));
+    }
+
     void forget(Player player) {
+        Objects.requireNonNull(player, "player");
         handshakes.remove(player.getUniqueId());
+    }
+
+    void clear() {
+        handshakes.clear();
     }
 
     private ClientHandshake parse(byte[] message) {
@@ -48,13 +85,13 @@ final class ClientHandshakeService implements PluginMessageListener {
             String modVersion = trim(cursor.readUtf(64), 64);
             String loader = trim(cursor.readUtf(32), 32);
             String minecraftVersion = trim(cursor.readUtf(32), 32);
-            return new ClientHandshake(modVersion, loader, minecraftVersion, Instant.now());
+            return new ClientHandshake(modVersion, loader, minecraftVersion, clock.instant());
         } catch (RuntimeException exception) {
             return null;
         }
     }
 
-    private String trim(String value, int maxLength) {
+    private static String trim(String value, int maxLength) {
         if (value == null || value.isBlank()) {
             return "unknown";
         }

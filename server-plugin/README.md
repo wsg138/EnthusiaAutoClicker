@@ -107,6 +107,12 @@ When detected, the check can report the mod version, loader, Minecraft version, 
 
 The handshake is a convenience signal only. It does not prove that the client is unmodified or that no other automation is installed.
 
+### Staff client evidence service
+
+The server plugin publishes `EnthusiaAutoClickerClientApi` version 1 through Bukkit's service manager. EnthusiaStaff uses that service to read the same bounded handshake fields for `/client` evidence without depending on private plugin classes or copying the raw plugin-message payload.
+
+Only the current in-memory session is exposed. Evidence is removed when a player leaves, when a malformed or unsupported replacement handshake is received, and when the plugin shuts down. The API does not persist client data and does not turn the handshake into proof that a client is trusted.
+
 ## Administrative command
 
 ```text
