@@ -2,11 +2,13 @@ package net.enthusia.autoclicker.server;
 
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.EntityType;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
+import net.enthusia.autoclicker.server.api.EnthusiaAutoClickerClientApi;
 
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private CombatXHook combatX;
@@ -48,6 +50,12 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
             ClientHandshakeService.CHANNEL,
             handshakeService
         );
+        getServer().getServicesManager().register(
+            EnthusiaAutoClickerClientApi.class,
+            handshakeService,
+            this,
+            ServicePriority.Normal
+        );
         AutoClickCommand commandExecutor = new AutoClickCommand(this, service, handshakeService);
         PluginCommand command = getCommand("autoclick");
         if (command != null) {
@@ -65,7 +73,11 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         if (service != null) {
             service.disableAll("plugin disabled");
         }
+        getServer().getServicesManager().unregisterAll(this);
         getServer().getMessenger().unregisterIncomingPluginChannel(this);
+        if (handshakeService != null) {
+            handshakeService.clear();
+        }
     }
 
     private void reloadSettings() {
