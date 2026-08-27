@@ -26,7 +26,7 @@ final class AutoClickService {
     private final EnthusiaServerAutoClickerPlugin plugin;
     private final CombatXHook combatX;
     private final InternalCombatTracker internalCombatTracker;
-    private final Map<UUID, AutoClickSession> sessions = new HashMap<>();
+    private final Map<UUID, AutoClickSession> sessions = new HashMap<>(); // NOPMD - Main-thread session state.
     private final Set<UUID> attackingPlayers = new HashSet<>();
 
     AutoClickService(
