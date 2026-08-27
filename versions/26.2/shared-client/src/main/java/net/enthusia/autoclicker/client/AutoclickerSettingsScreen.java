@@ -2,6 +2,7 @@ package net.enthusia.autoclicker.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -642,7 +643,7 @@ public final class AutoclickerSettingsScreen extends Screen {
 
     private static Component modeLabel(ActionMode mode) {
         return Component.translatable(
-            "mode.enthusia_autoclicker." + mode.name().toLowerCase()
+            "mode.enthusia_autoclicker." + mode.name().toLowerCase(Locale.ROOT)
         ).withStyle(mode == ActionMode.CLICK ? ChatFormatting.AQUA : ChatFormatting.GOLD);
     }
 
