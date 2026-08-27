@@ -3,6 +3,7 @@ package net.enthusia.autoclicker.server;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Locale;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -76,11 +77,12 @@ final class CombatXHook {
             if (!candidate.isEnabled()) {
                 continue;
             }
-            String lowerName = candidate.getName().toLowerCase();
+            String lowerName = candidate.getName().toLowerCase(Locale.ROOT);
             if (lowerName.contains("combatx")) {
                 named = candidate;
             }
-            URL apiResource = candidate.getClass().getClassLoader().getResource(COMBAT_MANAGER_RESOURCE);
+            URL apiResource = candidate.getClass().getClassLoader() // NOPMD - Query the supplying plugin's loader.
+                .getResource(COMBAT_MANAGER_RESOURCE);
             if (apiResource != null) {
                 return candidate;
             }
@@ -90,7 +92,7 @@ final class CombatXHook {
 
     private boolean hookFromPlugin(Plugin plugin) {
         try {
-            ClassLoader classLoader = plugin.getClass().getClassLoader();
+            ClassLoader classLoader = plugin.getClass().getClassLoader(); // NOPMD - Load the supplying plugin's API.
             Class<?> combatManager = Class.forName(COMBAT_MANAGER_CLASS, true, classLoader);
             isInCombatMethod = combatManager.getMethod("isInCombat", Player.class);
             available = true;
