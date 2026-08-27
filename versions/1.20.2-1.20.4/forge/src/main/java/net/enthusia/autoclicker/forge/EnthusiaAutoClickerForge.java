@@ -43,7 +43,7 @@ public final class EnthusiaAutoClickerForge {
         GLFW.GLFW_KEY_O,
         CATEGORY_KEY
     );
-    private static AutoclickerRuntime runtime;
+    private final AutoclickerRuntime runtime;
 
     public EnthusiaAutoClickerForge() {
         Path configPath = FMLPaths.CONFIGDIR.get().resolve("enthusia-autoclicker.properties");
@@ -64,13 +64,9 @@ public final class EnthusiaAutoClickerForge {
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
-            if (runtime != null) {
-                runtime.preTick(Minecraft.getInstance());
-            }
+            runtime.preTick(Minecraft.getInstance());
         } else if (event.phase == TickEvent.Phase.END) {
-            if (runtime != null) {
-                runtime.tick(Minecraft.getInstance());
-            }
+            runtime.tick(Minecraft.getInstance());
         }
     }
 

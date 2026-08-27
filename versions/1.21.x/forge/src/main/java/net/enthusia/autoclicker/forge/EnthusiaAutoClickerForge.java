@@ -42,8 +42,8 @@ public final class EnthusiaAutoClickerForge {
         GLFW.GLFW_KEY_O,
         CATEGORY
     );
-    private static AutoclickerRuntime runtime;
-    private static String modVersion = "unknown";
+    private final AutoclickerRuntime runtime;
+    private final String modVersion;
     private static final Channel<CustomPacketPayload> HANDSHAKE_NETWORK = ChannelBuilder.named(HANDSHAKE_CHANNEL)
         .optional()
         .payloadChannel()
@@ -63,30 +63,26 @@ public final class EnthusiaAutoClickerForge {
                 parent -> new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(config, parent)
             )
         );
-        RegisterKeyMappingsEvent.BUS.addListener(EnthusiaAutoClickerForge::registerKeyMappings);
-        TickEvent.ClientTickEvent.Pre.BUS.addListener(EnthusiaAutoClickerForge::onClientPreTick);
-        TickEvent.ClientTickEvent.Post.BUS.addListener(EnthusiaAutoClickerForge::onClientTick);
-        ClientPlayerNetworkEvent.LoggingIn.BUS.addListener(EnthusiaAutoClickerForge::onClientLogin);
+        RegisterKeyMappingsEvent.BUS.addListener(this::registerKeyMappings);
+        TickEvent.ClientTickEvent.Pre.BUS.addListener(this::onClientPreTick);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(this::onClientTick);
+        ClientPlayerNetworkEvent.LoggingIn.BUS.addListener(this::onClientLogin);
     }
 
-    private static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+    private void registerKeyMappings(RegisterKeyMappingsEvent event) {
         event.register(TOGGLE_KEY);
         event.register(SETTINGS_KEY);
     }
 
-    private static void onClientPreTick(TickEvent.ClientTickEvent.Pre event) {
-        if (runtime != null) {
-            runtime.preTick(Minecraft.getInstance());
-        }
+    private void onClientPreTick(TickEvent.ClientTickEvent.Pre event) {
+        runtime.preTick(Minecraft.getInstance());
     }
 
-    private static void onClientTick(TickEvent.ClientTickEvent.Post event) {
-        if (runtime != null) {
-            runtime.tick(Minecraft.getInstance());
-        }
+    private void onClientTick(TickEvent.ClientTickEvent.Post event) {
+        runtime.tick(Minecraft.getInstance());
     }
 
-    private static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+    private void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
         HANDSHAKE_NETWORK.send(new HandshakePayload(
             1,
             modVersion,
