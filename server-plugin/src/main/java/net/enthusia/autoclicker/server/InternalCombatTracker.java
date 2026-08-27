@@ -16,7 +16,7 @@ import org.bukkit.projectiles.ProjectileSource;
 
 final class InternalCombatTracker implements Listener {
     private final EnthusiaServerAutoClickerPlugin plugin;
-    private final Map<UUID, Long> combatUntilTicks = new HashMap<>();
+    private final Map<UUID, Long> combatUntilTicks = new HashMap<>(); // NOPMD - Synchronous event/tick state.
 
     InternalCombatTracker(EnthusiaServerAutoClickerPlugin plugin) {
         this.plugin = plugin;

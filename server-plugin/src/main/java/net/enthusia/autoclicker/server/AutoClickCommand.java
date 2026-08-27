@@ -3,6 +3,7 @@ package net.enthusia.autoclicker.server;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -57,7 +58,7 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             service.enableCooldown(player);
             return true;
         }
-        String argument = args[0].toLowerCase();
+        String argument = args[0].toLowerCase(Locale.ROOT);
         if (argument.equals("off") || argument.equals("stop") || argument.equals("disable")) {
             service.disable(player, "disabled");
             return true;
@@ -140,7 +141,8 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
     ) {
         if (args.length == 1) {
             List<String> options = new ArrayList<>(List.of("off", "status", "check", "reload", "20"));
-            options.removeIf(option -> !option.startsWith(args[0].toLowerCase()));
+            String prefix = args[0].toLowerCase(Locale.ROOT);
+            options.removeIf(option -> !option.startsWith(prefix));
             return options;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("check")
@@ -149,7 +151,8 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             for (Player player : plugin.getServer().getOnlinePlayers()) {
                 names.add(player.getName());
             }
-            names.removeIf(name -> !name.toLowerCase().startsWith(args[1].toLowerCase()));
+            String prefix = args[1].toLowerCase(Locale.ROOT);
+            names.removeIf(name -> !name.toLowerCase(Locale.ROOT).startsWith(prefix));
             return names;
         }
         if (args.length != 1) {
