@@ -30,7 +30,6 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
     private static final String CATEGORY_KEY = "key.category.enthusia_autoclicker.main";
 
     private static AutoclickerConfig config;
-    private AutoclickerRuntime runtime;
 
     @Override
     public void onInitializeClient() {
@@ -49,7 +48,7 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
         ));
 
         AutoclickerConfig loadedConfig = getOrLoadConfig();
-        runtime = new AutoclickerRuntime(loadedConfig, toggleKey, settingsKey);
+        AutoclickerRuntime runtime = new AutoclickerRuntime(loadedConfig, toggleKey, settingsKey);
         ClientTickEvents.START_CLIENT_TICK.register(runtime::preTick);
         ClientTickEvents.END_CLIENT_TICK.register(runtime::tick);
         ClientLifecycleEvents.CLIENT_STOPPING.register(runtime::stop);

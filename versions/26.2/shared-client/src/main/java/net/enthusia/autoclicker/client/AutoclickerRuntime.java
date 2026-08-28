@@ -47,7 +47,7 @@ public final class AutoclickerRuntime {
 
         while (settingsKey.consumeClick()) {
             if (client.gui.screen() == null) {
-                client.gui.setScreen(new AutoclickerSettingsScreen(config, null));
+                client.gui.setScreen(new AutoclickerSettingsScreen(config, null)); // NOPMD - fresh screen per key-open event
             }
         }
 
