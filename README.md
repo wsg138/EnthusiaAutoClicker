@@ -84,7 +84,7 @@ See **[`server-plugin/README.md`](server-plugin/README.md)** for the exact curre
 
 ## Build
 
-Java 25 is required to run the complete multi-version build. The `1.20`, `1.20.1`, and `1.20.2-1.20.4` artifacts target Java 17 bytecode, the `1.20.5-1.20.6` and `1.21.x` artifacts target Java 21, and the `26.1.x` and `26.2` artifacts require Java 25.
+Java 25 is required to run the complete multi-version build. Gradle selects Java 17 and Java 21 toolchains for the older nested builds, downloading a missing toolchain on the first build when necessary. The `1.20`, `1.20.1`, and `1.20.2-1.20.4` artifacts target Java 17 bytecode, the `1.20.5-1.20.6` and `1.21.x` artifacts target Java 21, and the `26.1.x` and `26.2` artifacts require Java 25.
 
 ```powershell
 .\gradlew.bat build
