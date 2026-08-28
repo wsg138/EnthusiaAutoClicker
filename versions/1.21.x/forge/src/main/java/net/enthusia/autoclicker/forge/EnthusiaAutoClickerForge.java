@@ -64,8 +64,8 @@ public final class EnthusiaAutoClickerForge {
             )
         );
         RegisterKeyMappingsEvent.BUS.addListener(this::registerKeyMappings);
-        TickEvent.ClientTickEvent.Pre.BUS.addListener(this::onClientPreTick);
-        TickEvent.ClientTickEvent.Post.BUS.addListener(this::onClientTick);
+        TickEvent.ClientTickEvent.Pre.BUS.addListener(ignored -> onClientPreTick());
+        TickEvent.ClientTickEvent.Post.BUS.addListener(ignored -> onClientTick());
         ClientPlayerNetworkEvent.LoggingIn.BUS.addListener(this::onClientLogin);
     }
 
@@ -74,11 +74,11 @@ public final class EnthusiaAutoClickerForge {
         event.register(SETTINGS_KEY);
     }
 
-    private void onClientPreTick(TickEvent.ClientTickEvent.Pre event) {
+    private void onClientPreTick() {
         runtime.preTick(Minecraft.getInstance());
     }
 
-    private void onClientTick(TickEvent.ClientTickEvent.Post event) {
+    private void onClientTick() {
         runtime.tick(Minecraft.getInstance());
     }
 

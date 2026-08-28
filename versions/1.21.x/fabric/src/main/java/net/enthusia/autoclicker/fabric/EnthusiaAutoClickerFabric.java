@@ -61,12 +61,14 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
         return new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(getOrLoadConfig(), parent);
     }
 
-    private static synchronized AutoclickerConfig getOrLoadConfig() {
-        if (config == null) {
-            Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
-            config = AutoclickerConfig.load(configPath);
+    private static AutoclickerConfig getOrLoadConfig() {
+        synchronized (EnthusiaAutoClickerFabric.class) {
+            if (config == null) {
+                Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
+                config = AutoclickerConfig.load(configPath);
+            }
+            return config;
         }
-        return config;
     }
 
     private static void sendHandshake() {
