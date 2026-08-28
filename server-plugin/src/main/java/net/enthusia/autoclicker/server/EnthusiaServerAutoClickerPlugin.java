@@ -5,12 +5,18 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Set;
 import net.enthusia.autoclicker.server.api.EnthusiaAutoClickerClientApi;
 
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
+    private static final long MINIMUM_EVIDENCE_RETENTION_MINUTES = 1L;
+    private static final long MAXIMUM_EVIDENCE_RETENTION_MINUTES = 1440L;
+    private static final int MINIMUM_EVIDENCE_RECORDS = 100;
+    private static final int MAXIMUM_EVIDENCE_RECORDS = 100_000;
+
     private CombatXHook combatX;
     private AutoClickService service;
     private ClientHandshakeService handshakeService;
@@ -44,6 +50,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         InternalCombatTracker internalCombatTracker = new InternalCombatTracker(this);
         service = new AutoClickService(this, combatX, internalCombatTracker);
         handshakeService = new ClientHandshakeService();
+        applyClientEvidencePolicy();
         getServer().getMessenger().registerIncomingPluginChannel(
             this,
             ClientHandshakeService.CHANNEL,
@@ -103,10 +110,31 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     void reloadSettingsForCommand() {
         reloadConfig();
         reloadSettings();
+        applyClientEvidencePolicy();
         if (combatX != null) {
             combatX.resetAvailabilityWarning();
             combatX.refresh();
         }
+    }
+
+    private void applyClientEvidencePolicy() {
+        if (handshakeService == null) {
+            return;
+        }
+        long configuredRetention = getConfig().getLong(
+                "client-evidence.retention-minutes",
+                30L
+        );
+        long retentionMinutes = Math.max(
+                MINIMUM_EVIDENCE_RETENTION_MINUTES,
+                Math.min(MAXIMUM_EVIDENCE_RETENTION_MINUTES, configuredRetention)
+        );
+        int configuredMaximum = getConfig().getInt("client-evidence.maximum-records", 2048);
+        int maximumRecords = Math.max(
+                MINIMUM_EVIDENCE_RECORDS,
+                Math.min(MAXIMUM_EVIDENCE_RECORDS, configuredMaximum)
+        );
+        handshakeService.updatePolicy(Duration.ofMinutes(retentionMinutes), maximumRecords);
     }
 
     private Set<EntityType> parseEntityTypes(String path) {

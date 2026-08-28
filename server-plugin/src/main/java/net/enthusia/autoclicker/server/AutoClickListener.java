@@ -44,7 +44,7 @@ final class AutoClickListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         service.disable(event.getPlayer(), "");
-        handshakeService.forget(event.getPlayer());
+        handshakeService.markOffline(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

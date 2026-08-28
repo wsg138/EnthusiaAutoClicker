@@ -23,32 +23,30 @@ public record ClientEvidenceSnapshot(
         boolean currentSession
 ) {
     public static final int UNKNOWN_PROTOCOL_VERSION = 0;
-    private static final int MAX_PROTOCOL_VERSION = 255;
-    private static final int MAX_MOD_VERSION_LENGTH = 64;
-    private static final int MAX_LOADER_LENGTH = 32;
-    private static final int MAX_MINECRAFT_VERSION_LENGTH = 32;
 
     public ClientEvidenceSnapshot {
         Objects.requireNonNull(playerId, "playerId");
         Objects.requireNonNull(validation, "validation");
-        modVersion = validated(modVersion, "modVersion", MAX_MOD_VERSION_LENGTH);
-        loader = validated(loader, "loader", MAX_LOADER_LENGTH);
-        minecraftVersion = validated(
+        modVersion = ClientEvidenceSnapshotRules.versionField(
+                modVersion,
+                "modVersion",
+                ClientEvidenceSnapshotRules.VersionField.MOD
+        );
+        loader = ClientEvidenceSnapshotRules.versionField(
+                loader,
+                "loader",
+                ClientEvidenceSnapshotRules.VersionField.LOADER
+        );
+        minecraftVersion = ClientEvidenceSnapshotRules.versionField(
                 minecraftVersion,
                 "minecraftVersion",
-                MAX_MINECRAFT_VERSION_LENGTH
+                ClientEvidenceSnapshotRules.VersionField.MINECRAFT
         );
         observedAt = Objects.requireNonNull(observedAt, "observedAt");
-        if (evidenceVersion < 1) {
-            throw new IllegalArgumentException("evidenceVersion must be positive");
-        }
-        if (handshakeProtocolVersion < UNKNOWN_PROTOCOL_VERSION
-                || handshakeProtocolVersion > MAX_PROTOCOL_VERSION) {
-            throw new IllegalArgumentException("handshakeProtocolVersion must fit one unsigned byte");
-        }
-        validateShape(
-                validation,
+        ClientEvidenceSnapshotRules.validate(
+                evidenceVersion,
                 handshakeProtocolVersion,
+                validation,
                 modVersion,
                 loader,
                 minecraftVersion,
@@ -152,52 +150,4 @@ public record ClientEvidenceSnapshot(
         );
     }
 
-    private static Optional<String> validated(
-            Optional<String> value,
-            String fieldName,
-            int maximumLength
-    ) {
-        Optional<String> required = Objects.requireNonNull(value, fieldName);
-        required.ifPresent(field -> {
-            if (field.isBlank() || field.length() > maximumLength) {
-                throw new IllegalArgumentException(fieldName + " is invalid");
-            }
-        });
-        return required;
-    }
-
-    private static void validateShape(
-            ClientEvidenceValidation validation,
-            int handshakeProtocolVersion,
-            Optional<String> modVersion,
-            Optional<String> loader,
-            Optional<String> minecraftVersion,
-            Optional<Instant> observedAt,
-            boolean currentSession
-    ) {
-        boolean hasAllClientFields = modVersion.isPresent()
-                && loader.isPresent()
-                && minecraftVersion.isPresent();
-        boolean hasAnyClientField = modVersion.isPresent()
-                || loader.isPresent()
-                || minecraftVersion.isPresent();
-        if (validation == ClientEvidenceValidation.VALID) {
-            if (!hasAllClientFields || observedAt.isEmpty()) {
-                throw new IllegalArgumentException("valid evidence requires every handshake field");
-            }
-            return;
-        }
-        if (hasAnyClientField) {
-            throw new IllegalArgumentException("invalid evidence cannot contain client version fields");
-        }
-        if (validation == ClientEvidenceValidation.NOT_OBSERVED) {
-            if (handshakeProtocolVersion != UNKNOWN_PROTOCOL_VERSION
-                    || observedAt.isPresent()
-                    || currentSession) {
-                throw new IllegalArgumentException("unobserved evidence cannot contain observation state");
-            }
-        } else if (observedAt.isEmpty()) {
-            throw new IllegalArgumentException("observed evidence requires a timestamp");
-        }
-    }
 }

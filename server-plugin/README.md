@@ -109,9 +109,9 @@ The handshake is a convenience signal only. It does not prove that the client is
 
 ### Staff client evidence service
 
-The server plugin publishes `EnthusiaAutoClickerClientApi` version 1 through Bukkit's service manager. EnthusiaStaff uses that service to read the same bounded handshake fields for `/client` evidence without depending on private plugin classes or copying the raw plugin-message payload.
+The server plugin publishes the backward-compatible `EnthusiaAutoClickerClientApi` version 1 through Bukkit's service manager. Its evidence schema is versioned separately. `evidence(UUID)` reports whether a handshake was observed, the client protocol, validation state, bounded version fields, observation time, and whether the observation belongs to the current session. The original `handshake(UUID)` query remains available and returns only a validated handshake from the current session.
 
-Only the current in-memory session is exposed. Evidence is removed when a player leaves, when a malformed or unsupported replacement handshake is received, and when the plugin shuts down. The API does not persist client data and does not turn the handshake into proof that a client is trusted.
+Recent evidence remains available in memory after logout for moderation lookups. By default, observations expire after 30 minutes and the oldest record is discarded when the 2,048-record limit is reached. `client-evidence.retention-minutes` and `client-evidence.maximum-records` control those bounds and apply on `/autoclick reload`. Unsupported or malformed replacement payloads are reported as such instead of being presented as validated evidence. All observations are cleared on shutdown and are never written to disk.
 
 ## Administrative command
 

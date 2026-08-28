@@ -86,6 +86,20 @@ class ClientEvidenceSnapshotTest {
         );
     }
 
+    @Test
+    void defaultEvidenceQueryKeepsExistingApiImplementationsCompatible() {
+        UUID playerId = UUID.randomUUID();
+        EnthusiaAutoClickerClientApi legacyImplementation = requestedPlayer -> Optional.of(
+                new ClientHandshakeSnapshot("1.3.2", "fabric", "1.21.11", OBSERVED_AT)
+        );
+
+        ClientEvidenceSnapshot evidence = legacyImplementation.evidence(playerId);
+
+        assertEquals(ClientEvidenceValidation.VALID, evidence.validation());
+        assertTrue(evidence.currentSession());
+        assertEquals(HANDSHAKE_PROTOCOL_VERSION, evidence.handshakeProtocolVersion());
+    }
+
     private static ClientEvidenceSnapshot valid(UUID playerId) {
         return ClientEvidenceSnapshot.valid(
                 playerId,

@@ -7,6 +7,7 @@ import java.util.UUID;
 public interface EnthusiaAutoClickerClientApi {
     int API_VERSION = 1;
     int EVIDENCE_VERSION = 1;
+    int HANDSHAKE_PROTOCOL_VERSION = 1;
 
     default int apiVersion() {
         return API_VERSION;
@@ -20,7 +21,7 @@ public interface EnthusiaAutoClickerClientApi {
                 .map(snapshot -> ClientEvidenceSnapshot.valid(
                         playerId,
                         EVIDENCE_VERSION,
-                        1,
+                        HANDSHAKE_PROTOCOL_VERSION,
                         snapshot.modVersion(),
                         snapshot.loader(),
                         snapshot.minecraftVersion(),
