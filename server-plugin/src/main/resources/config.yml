@@ -18,6 +18,12 @@ minimum-fixed-interval-ticks: 1
 # If false, the plugin still uses CombatX when available and falls back to its own PvP tracker when CombatX cannot be hooked.
 require-combatx: false
 
+# Recent client handshake observations remain available to moderation integrations after logout.
+# Records are kept only in memory, expire automatically, and are capped to prevent unbounded use.
+client-evidence:
+  retention-minutes: 30
+  maximum-records: 2048
+
 # Fallback PvP combat duration when CombatX cannot be hooked or when a player is exempt from CombatX tagging.
 internal-combat-duration-ticks: 200
 
