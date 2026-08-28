@@ -17,16 +17,17 @@ class ClientHandshakeServiceTest {
     private static final Instant RECEIVED_AT = Instant.parse("2026-08-25T12:00:00Z");
     private static final String CURRENT_MOD_VERSION = "1.3.2";
     private static final String CURRENT_MINECRAFT_VERSION = "1.21.11";
+    private static final String FABRIC_LOADER = "fabric";
 
     @Test
     void publishesAValidatedSnapshotForTheCurrentHandshake() {
         ClientHandshakeService service = service();
         UUID playerId = UUID.randomUUID();
 
-        service.accept(playerId, handshake(1, CURRENT_MOD_VERSION, "fabric", CURRENT_MINECRAFT_VERSION));
+        service.accept(playerId, handshake(1, CURRENT_MOD_VERSION, FABRIC_LOADER, CURRENT_MINECRAFT_VERSION));
 
         assertEquals(
-            new ClientHandshakeSnapshot(CURRENT_MOD_VERSION, "fabric", CURRENT_MINECRAFT_VERSION, RECEIVED_AT),
+            new ClientHandshakeSnapshot(CURRENT_MOD_VERSION, FABRIC_LOADER, CURRENT_MINECRAFT_VERSION, RECEIVED_AT),
             service.handshake(playerId).orElseThrow()
         );
         assertEquals(1, service.apiVersion());
@@ -36,9 +37,9 @@ class ClientHandshakeServiceTest {
     void invalidHandshakeRemovesStaleEvidence() {
         ClientHandshakeService service = service();
         UUID playerId = UUID.randomUUID();
-        service.accept(playerId, handshake(1, CURRENT_MOD_VERSION, "fabric", CURRENT_MINECRAFT_VERSION));
+        service.accept(playerId, handshake(1, CURRENT_MOD_VERSION, FABRIC_LOADER, CURRENT_MINECRAFT_VERSION));
 
-        service.accept(playerId, handshake(2, CURRENT_MOD_VERSION, "fabric", CURRENT_MINECRAFT_VERSION));
+        service.accept(playerId, handshake(2, CURRENT_MOD_VERSION, FABRIC_LOADER, CURRENT_MINECRAFT_VERSION));
 
         assertTrue(service.handshake(playerId).isEmpty());
     }
@@ -58,7 +59,7 @@ class ClientHandshakeServiceTest {
         ClientHandshakeService service = service();
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
-        service.accept(first, handshake(1, CURRENT_MOD_VERSION, "fabric", CURRENT_MINECRAFT_VERSION));
+        service.accept(first, handshake(1, CURRENT_MOD_VERSION, FABRIC_LOADER, CURRENT_MINECRAFT_VERSION));
         service.accept(second, handshake(1, CURRENT_MOD_VERSION, "neoforge", "26.1"));
 
         service.clear();
