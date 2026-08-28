@@ -28,7 +28,7 @@ final class ClientEvidenceSnapshotRules {
         return required;
     }
 
-    static void validate(
+    static void validateSnapshot(
             int evidenceVersion,
             int handshakeProtocolVersion,
             ClientEvidenceValidation validation,

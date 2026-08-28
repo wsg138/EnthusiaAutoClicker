@@ -43,7 +43,7 @@ public record ClientEvidenceSnapshot(
                 ClientEvidenceSnapshotRules.VersionField.MINECRAFT
         );
         observedAt = Objects.requireNonNull(observedAt, "observedAt");
-        ClientEvidenceSnapshotRules.validate(
+        ClientEvidenceSnapshotRules.validateSnapshot(
                 evidenceVersion,
                 handshakeProtocolVersion,
                 validation,
