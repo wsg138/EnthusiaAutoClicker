@@ -13,7 +13,6 @@ import net.enthusia.autoclicker.server.api.EnthusiaAutoClickerClientApi;
 public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
     private CombatXHook combatX;
     private AutoClickService service;
-    private InternalCombatTracker internalCombatTracker;
     private ClientHandshakeService handshakeService;
     private double maxMovementBlocks;
     private double attackRangeBlocks;
@@ -42,7 +41,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
         combatX = new CombatXHook();
         combatX.initialize(this);
 
-        internalCombatTracker = new InternalCombatTracker(this);
+        InternalCombatTracker internalCombatTracker = new InternalCombatTracker(this);
         service = new AutoClickService(this, combatX, internalCombatTracker);
         handshakeService = new ClientHandshakeService();
         getServer().getMessenger().registerIncomingPluginChannel(

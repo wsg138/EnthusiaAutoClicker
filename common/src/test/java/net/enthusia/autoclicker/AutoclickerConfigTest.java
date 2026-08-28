@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class AutoclickerConfigTest {
+    private static final String CONFIG_FILE = "config.properties";
+
     @TempDir
     Path tempDirectory;
 
     @Test
     void migratesLegacyOffModesToIndependentToggles() throws IOException {
-        Path path = tempDirectory.resolve("config.properties");
+        Path path = tempDirectory.resolve(CONFIG_FILE);
         Files.writeString(path, """
             left-mode=click
             right-mode=off
@@ -36,7 +38,7 @@ class AutoclickerConfigTest {
 
     @Test
     void savesAndLoadsExtras() {
-        Path path = tempDirectory.resolve("config.properties");
+        Path path = tempDirectory.resolve(CONFIG_FILE);
         AutoclickerConfig config = AutoclickerConfig.load(path);
         config.setDurabilityGuard(true);
         config.setMinimumDurability(25);
@@ -58,7 +60,7 @@ class AutoclickerConfigTest {
 
     @Test
     void rejectsUnsafeExtrasRanges() {
-        AutoclickerConfig config = AutoclickerConfig.load(tempDirectory.resolve("config.properties"));
+        AutoclickerConfig config = AutoclickerConfig.load(tempDirectory.resolve(CONFIG_FILE));
 
         assertThrows(IllegalArgumentException.class, () -> config.setMinimumDurability(0));
         assertThrows(IllegalArgumentException.class, () -> config.setRestockAtCount(64));
@@ -66,7 +68,7 @@ class AutoclickerConfigTest {
 
     @Test
     void acceptsTwelveAndAHalfTickIntervals() {
-        AutoclickerConfig config = AutoclickerConfig.load(tempDirectory.resolve("config.properties"));
+        AutoclickerConfig config = AutoclickerConfig.load(tempDirectory.resolve(CONFIG_FILE));
 
         config.setLeftIntervalMillis(625L);
 
