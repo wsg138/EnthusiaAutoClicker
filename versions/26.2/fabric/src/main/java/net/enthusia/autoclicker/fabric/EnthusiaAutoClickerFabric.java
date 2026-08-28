@@ -48,9 +48,8 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
             CATEGORY
         ));
 
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
-        config = AutoclickerConfig.load(configPath);
-        runtime = new AutoclickerRuntime(config, toggleKey, settingsKey);
+        AutoclickerConfig loadedConfig = getOrLoadConfig();
+        runtime = new AutoclickerRuntime(loadedConfig, toggleKey, settingsKey);
         ClientTickEvents.START_CLIENT_TICK.register(runtime::preTick);
         ClientTickEvents.END_CLIENT_TICK.register(runtime::tick);
         ClientLifecycleEvents.CLIENT_STOPPING.register(runtime::stop);
@@ -58,11 +57,17 @@ public final class EnthusiaAutoClickerFabric implements ClientModInitializer {
     }
 
     public static Screen createConfigScreen(Screen parent) {
-        if (config == null) {
-            Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
-            config = AutoclickerConfig.load(configPath);
+        return new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(getOrLoadConfig(), parent);
+    }
+
+    private static AutoclickerConfig getOrLoadConfig() {
+        synchronized (EnthusiaAutoClickerFabric.class) {
+            if (config == null) {
+                Path configPath = FabricLoader.getInstance().getConfigDir().resolve("enthusia-autoclicker.properties");
+                config = AutoclickerConfig.load(configPath);
+            }
+            return config;
         }
-        return new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(config, parent);
     }
 
     private static void sendHandshake() {

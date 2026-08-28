@@ -2,6 +2,7 @@ package net.enthusia.autoclicker.neoforge;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
 import net.enthusia.autoclicker.AutoclickerConfig;
 import net.enthusia.autoclicker.client.AutoclickerRuntime;
 import net.minecraft.SharedConstants;
@@ -46,14 +47,14 @@ public final class EnthusiaAutoClickerNeoForge {
         GLFW.GLFW_KEY_O,
         CATEGORY
     );
-    private static AutoclickerRuntime runtime;
-    private static String modVersion = "unknown";
+    private static final AtomicReference<BootstrapState> BOOTSTRAP_STATE = new AtomicReference<>();
 
     public EnthusiaAutoClickerNeoForge(ModContainer container) {
-        modVersion = container.getModInfo().getVersion().toString();
+        String modVersion = container.getModInfo().getVersion().toString();
         Path configPath = FMLPaths.CONFIGDIR.get().resolve("enthusia-autoclicker.properties");
         AutoclickerConfig config = AutoclickerConfig.load(configPath);
-        runtime = new AutoclickerRuntime(config, TOGGLE_KEY, SETTINGS_KEY);
+        AutoclickerRuntime runtime = new AutoclickerRuntime(config, TOGGLE_KEY, SETTINGS_KEY);
+        BOOTSTRAP_STATE.set(new BootstrapState(runtime, modVersion));
         container.registerExtensionPoint(
             IConfigScreenFactory.class,
             (ignored, parent) -> new net.enthusia.autoclicker.client.AutoclickerSettingsScreen(config, parent)
@@ -76,27 +77,32 @@ public final class EnthusiaAutoClickerNeoForge {
 
     @SubscribeEvent
     public static void onClientPreTick(ClientTickEvent.Pre event) {
-        if (runtime != null) {
-            runtime.preTick(Minecraft.getInstance());
+        BootstrapState state = BOOTSTRAP_STATE.get();
+        if (state != null) {
+            state.runtime().preTick(Minecraft.getInstance());
         }
     }
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        if (runtime != null) {
-            runtime.tick(Minecraft.getInstance());
+        BootstrapState state = BOOTSTRAP_STATE.get();
+        if (state != null) {
+            state.runtime().tick(Minecraft.getInstance());
         }
     }
 
     @SubscribeEvent
     public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        BootstrapState state = BOOTSTRAP_STATE.get();
         event.getConnection().send(new ServerboundCustomPayloadPacket(new HandshakePayload(
             1,
-            modVersion,
+            state == null ? "unknown" : state.modVersion(),
             "neoforge",
             SharedConstants.getCurrentVersion().name()
         )));
     }
+
+    private record BootstrapState(AutoclickerRuntime runtime, String modVersion) {}
 
     private record HandshakePayload(
         int protocolVersion,
