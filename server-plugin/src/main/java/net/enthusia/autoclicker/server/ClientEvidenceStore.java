@@ -10,8 +10,10 @@ import net.enthusia.autoclicker.server.api.ClientEvidenceSnapshot;
 import net.enthusia.autoclicker.server.api.EnthusiaAutoClickerClientApi;
 
 final class ClientEvidenceStore {
+    private static final String NOW_PARAMETER = "now";
+
     private final Object lock = new Object();
-    private final Map<UUID, ClientEvidenceSnapshot> evidenceByPlayer = new LinkedHashMap<>();
+    private final Map<UUID, ClientEvidenceSnapshot> evidenceByPlayer = new LinkedHashMap<>(); // NOPMD - All access uses lock; insertion order is required for atomic oldest-record eviction.
     private ClientEvidencePolicy policy;
 
     ClientEvidenceStore(ClientEvidencePolicy policy) {
@@ -20,7 +22,7 @@ final class ClientEvidenceStore {
 
     void store(ClientEvidenceSnapshot evidence, Instant now) {
         Objects.requireNonNull(evidence, "evidence");
-        Objects.requireNonNull(now, "now");
+        Objects.requireNonNull(now, NOW_PARAMETER);
         synchronized (lock) {
             pruneExpired(now);
             evidenceByPlayer.remove(evidence.playerId());
@@ -31,7 +33,7 @@ final class ClientEvidenceStore {
 
     ClientEvidenceSnapshot find(UUID playerId, Instant now) {
         Objects.requireNonNull(playerId, "playerId");
-        Objects.requireNonNull(now, "now");
+        Objects.requireNonNull(now, NOW_PARAMETER);
         synchronized (lock) {
             pruneExpired(now);
             ClientEvidenceSnapshot evidence = evidenceByPlayer.get(playerId);
@@ -46,7 +48,7 @@ final class ClientEvidenceStore {
 
     void markOffline(UUID playerId, Instant now) {
         Objects.requireNonNull(playerId, "playerId");
-        Objects.requireNonNull(now, "now");
+        Objects.requireNonNull(now, NOW_PARAMETER);
         synchronized (lock) {
             pruneExpired(now);
             evidenceByPlayer.computeIfPresent(
@@ -58,7 +60,7 @@ final class ClientEvidenceStore {
 
     void updatePolicy(ClientEvidencePolicy policy, Instant now) {
         Objects.requireNonNull(policy, "policy");
-        Objects.requireNonNull(now, "now");
+        Objects.requireNonNull(now, NOW_PARAMETER);
         synchronized (lock) {
             this.policy = policy;
             pruneExpired(now);

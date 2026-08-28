@@ -14,6 +14,9 @@ class ClientEvidenceSnapshotTest {
     private static final int EVIDENCE_VERSION = 1;
     private static final int HANDSHAKE_PROTOCOL_VERSION = 1;
     private static final Instant OBSERVED_AT = Instant.parse("2026-08-27T12:00:00Z");
+    private static final String MOD_VERSION = "1.3.2";
+    private static final String LOADER = "fabric";
+    private static final String MINECRAFT_VERSION = "1.21.11";
 
     @Test
     void exposesValidatedHandshakeFieldsWithoutLosingSchemaState() {
@@ -27,7 +30,7 @@ class ClientEvidenceSnapshotTest {
         assertEquals(ClientEvidenceValidation.VALID, snapshot.validation());
         assertTrue(snapshot.handshakeObserved());
         assertEquals(
-                new ClientHandshakeSnapshot("1.3.2", "fabric", "1.21.11", OBSERVED_AT),
+                new ClientHandshakeSnapshot(MOD_VERSION, LOADER, MINECRAFT_VERSION, OBSERVED_AT),
                 snapshot.validatedHandshake().orElseThrow()
         );
     }
@@ -67,8 +70,8 @@ class ClientEvidenceSnapshotTest {
                         HANDSHAKE_PROTOCOL_VERSION,
                         ClientEvidenceValidation.VALID,
                         Optional.empty(),
-                        Optional.of("fabric"),
-                        Optional.of("1.21.11"),
+                        Optional.of(LOADER),
+                        Optional.of(MINECRAFT_VERSION),
                         Optional.of(OBSERVED_AT),
                         true
                 )
@@ -90,7 +93,7 @@ class ClientEvidenceSnapshotTest {
     void defaultEvidenceQueryKeepsExistingApiImplementationsCompatible() {
         UUID playerId = UUID.randomUUID();
         EnthusiaAutoClickerClientApi legacyImplementation = requestedPlayer -> Optional.of(
-                new ClientHandshakeSnapshot("1.3.2", "fabric", "1.21.11", OBSERVED_AT)
+                new ClientHandshakeSnapshot(MOD_VERSION, LOADER, MINECRAFT_VERSION, OBSERVED_AT)
         );
 
         ClientEvidenceSnapshot evidence = legacyImplementation.evidence(playerId);
@@ -105,9 +108,9 @@ class ClientEvidenceSnapshotTest {
                 playerId,
                 EVIDENCE_VERSION,
                 HANDSHAKE_PROTOCOL_VERSION,
-                "1.3.2",
-                "fabric",
-                "1.21.11",
+                MOD_VERSION,
+                LOADER,
+                MINECRAFT_VERSION,
                 OBSERVED_AT,
                 true
         );
