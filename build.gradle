@@ -1,5 +1,7 @@
+import java.util.Locale
+
 plugins {
-    id 'base'
+    id 'java-base'
     id 'fabric-loom' version '1.14.10' apply false
     id 'net.fabricmc.fabric-loom' version '1.14.10' apply false
     id 'net.minecraftforge.gradle' version '[7.0.3,8)' apply false
@@ -11,41 +13,32 @@ allprojects {
     version = mod_version
 }
 
-tasks.register('buildMinecraft1201', Exec) {
-    workingDir layout.projectDirectory.dir('versions/1.20.x')
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    } else {
-        commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
+def java17Launcher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(17)
+}
+def java21Launcher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(21)
+}
+def isWindows = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')
+
+def registerLegacyBuild = { String taskName, String versionDirectory, def javaLauncher ->
+    tasks.register(taskName, Exec) {
+        workingDir layout.projectDirectory.dir(versionDirectory)
+        doFirst {
+            environment 'JAVA_HOME', javaLauncher.get().metadata.installationPath.asFile.absolutePath
+        }
+        if (isWindows) {
+            commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
+        } else {
+            commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
+        }
     }
 }
 
-tasks.register('buildMinecraft1200', Exec) {
-    workingDir layout.projectDirectory.dir('versions/1.20')
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    } else {
-        commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    }
-}
-
-tasks.register('buildMinecraft12024', Exec) {
-    workingDir layout.projectDirectory.dir('versions/1.20.2-1.20.4')
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    } else {
-        commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    }
-}
-
-tasks.register('buildMinecraft12056', Exec) {
-    workingDir layout.projectDirectory.dir('versions/1.20.5-1.20.6')
-    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
-        commandLine 'cmd', '/c', 'gradlew.bat', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    } else {
-        commandLine './gradlew', ':common:test', ':fabric:build', ':forge:build', '--console=plain'
-    }
-}
+registerLegacyBuild('buildMinecraft1200', 'versions/1.20', java17Launcher)
+registerLegacyBuild('buildMinecraft1201', 'versions/1.20.x', java17Launcher)
+registerLegacyBuild('buildMinecraft12024', 'versions/1.20.2-1.20.4', java17Launcher)
+registerLegacyBuild('buildMinecraft12056', 'versions/1.20.5-1.20.6', java21Launcher)
 
 tasks.named('build') {
     dependsOn 'buildMinecraft1200', 'buildMinecraft1201', 'buildMinecraft12024', 'buildMinecraft12056', ':common:test', ':fabric:build',
