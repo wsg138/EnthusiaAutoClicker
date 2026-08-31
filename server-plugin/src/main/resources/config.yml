@@ -42,13 +42,12 @@ allow-through-passable-blocks: true
 # If true, opening a chest, menu, villager trade, or other non-default inventory stops autoclicking.
 stop-when-inventory-open: true
 
-# Conservative SMP target filtering. DENYLIST allows hostile mobs by default while excluding
+# Conservative SMP target filtering. DENYLIST allows hostile mobs and armor stands by default while excluding
 # players, NPC-like entities, passive animals, and pets. ALLOWLIST only permits allowed-types.
 target-filter:
   mode: DENYLIST
   allowed-types: []
   denied-types:
-    - ARMOR_STAND
     - VILLAGER
     - WANDERING_TRADER
     - PLAYER
