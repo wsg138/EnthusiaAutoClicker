@@ -36,12 +36,16 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
         @NotNull String label,
         @NotNull String[] args
     ) {
-        if (args.length > 0 && args[0].equalsIgnoreCase("check")) {
+        if (hasAction(args, "check")) {
             return checkPlayer(sender, args);
         }
-        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+        if (hasAction(args, "reload")) {
             return reload(sender);
         }
+        return handlePlayerCommand(sender, args);
+    }
+
+    private boolean handlePlayerCommand(CommandSender sender, String[] args) {
         if (!sender.hasPermission("enthusia.autoclicker.use")) {
             sender.sendMessage(error("You do not have permission to use this command."));
             return true;
@@ -58,15 +62,28 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             service.enableCooldown(player);
             return true;
         }
-        String argument = args[0].toLowerCase(Locale.ROOT);
-        if (argument.equals("off") || argument.equals("stop") || argument.equals("disable")) {
-            service.disable(player, "disabled");
-            return true;
-        }
-        if (argument.equals("status")) {
-            player.sendMessage(service.status(player));
-            return true;
-        }
+        return handlePlayerAction(player, args[0].toLowerCase(Locale.ROOT));
+    }
+
+    private boolean handlePlayerAction(Player player, String argument) {
+        return switch (argument) {
+            case "off", "stop", "disable" -> stop(player);
+            case "status" -> showStatus(player);
+            default -> enableFixed(player, argument);
+        };
+    }
+
+    private boolean stop(Player player) {
+        service.disable(player, "disabled");
+        return true;
+    }
+
+    private boolean showStatus(Player player) {
+        player.sendMessage(service.status(player));
+        return true;
+    }
+
+    private boolean enableFixed(Player player, String argument) {
         try {
             int intervalTicks = Integer.parseInt(argument);
             if (intervalTicks < plugin.minimumFixedIntervalTicks()) {
@@ -79,6 +96,10 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(ChatColor.YELLOW + "Usage: " + ChatColor.WHITE + "/autoclick [ticks|off|status]");
             return true;
         }
+    }
+
+    private static boolean hasAction(String[] args, String action) {
+        return args.length > 0 && args[0].equalsIgnoreCase(action);
     }
 
     private boolean reload(CommandSender sender) {
@@ -154,9 +175,6 @@ final class AutoClickCommand implements CommandExecutor, TabCompleter {
             String prefix = args[1].toLowerCase(Locale.ROOT);
             names.removeIf(name -> !name.toLowerCase(Locale.ROOT).startsWith(prefix));
             return names;
-        }
-        if (args.length != 1) {
-            return List.of();
         }
         return List.of();
     }

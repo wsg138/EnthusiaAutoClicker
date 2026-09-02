@@ -47,7 +47,7 @@ The SMP configuration is intentionally aimed at hostile-mob farming rather than 
 The server autoclicker:
 
 - **never deliberately targets players**;
-- excludes armor stands, villagers, and wandering traders;
+- allows armor stands, but excludes villagers and wandering traders;
 - excludes tamed animals;
 - excludes passive animals, water mobs, ambient mobs, and golems by default;
 - can attack other valid living mobs under the player's crosshair;

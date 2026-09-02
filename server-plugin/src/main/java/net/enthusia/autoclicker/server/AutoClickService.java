@@ -108,42 +108,63 @@ final class AutoClickService {
     }
 
     private void tick(Player player, AutoClickSession session) {
-        if (plugin.requireCombatX() && !combatX.isAvailable()) {
-            disable(player, "CombatX is unavailable");
+        if (stopForInvalidState(player, session)) {
             return;
         }
-        if (combatX.isInCombat(player) || internalCombatTracker.isInCombat(player)) {
-            disable(player, "you are in combat");
+        if (!isAttackReady(player, session)) {
             return;
+        }
+        attackTargetOrHandleMiss(player);
+    }
+
+    private boolean stopForInvalidState(Player player, AutoClickSession session) {
+        if (stopForCombatState(player)) {
+            return true;
         }
         if (!canUse(player)) {
             disable(player, "you cannot attack right now");
-            return;
+            return true;
         }
         if (plugin.stopWhenInventoryOpen() && hasBlockingInventoryOpen(player)) {
             disable(player, "inventory or menu opened");
-            return;
+            return true;
         }
         if (movedTooFar(player, session)) {
             disable(player, "you moved too far");
-            return;
+            return true;
         }
-        boolean ready = session.mode() == AutoClickMode.COOLDOWN
+        return false;
+    }
+
+    private boolean stopForCombatState(Player player) {
+        if (plugin.requireCombatX() && !combatX.isAvailable()) {
+            disable(player, "CombatX is unavailable");
+            return true;
+        }
+        if (combatX.isInCombat(player) || internalCombatTracker.isInCombat(player)) {
+            disable(player, "you are in combat");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAttackReady(Player player, AutoClickSession session) {
+        return session.mode() == AutoClickMode.COOLDOWN
             ? player.getAttackCooldown() >= 1.0F
             : session.consumeFixedIntervalTick();
-        if (!ready) {
-            return;
-        }
+    }
+
+    private void attackTargetOrHandleMiss(Player player) {
         LivingEntity target = findTarget(player);
-        if (target == null) {
-            if (plugin.stopWhenNoTarget()) {
-                disable(player, "no valid target");
-            } else if (plugin.swingWhenNoTarget()) {
-                player.swingMainHand();
-            }
+        if (target != null) {
+            attack(player, target);
             return;
         }
-        attack(player, target);
+        if (plugin.stopWhenNoTarget()) {
+            disable(player, "no valid target");
+        } else if (plugin.swingWhenNoTarget()) {
+            player.swingMainHand();
+        }
     }
 
     private boolean canUse(Player player) {
@@ -229,8 +250,7 @@ final class AutoClickService {
         if (plugin.allowedTargetTypes().contains(entity.getType())) {
             return true;
         }
-        if (plugin.targetFilterMode() == EnthusiaServerAutoClickerPlugin.TargetFilterMode.ALLOWLIST
-            && !plugin.allowedTargetTypes().contains(entity.getType())) {
+        if (plugin.targetFilterMode() == EnthusiaServerAutoClickerPlugin.TargetFilterMode.ALLOWLIST) {
             return false;
         }
         if (plugin.deniedTargetTypes().contains(entity.getType())) {
@@ -239,7 +259,11 @@ final class AutoClickService {
         if (plugin.denyTamedAnimals() && entity instanceof Tameable tameable && tameable.isTamed()) {
             return false;
         }
-        return !plugin.denyPassiveAnimals() || !isPassiveMob(entity);
+        return !isDeniedPassiveMob(entity);
+    }
+
+    private boolean isDeniedPassiveMob(LivingEntity entity) {
+        return plugin.denyPassiveAnimals() && isPassiveMob(entity);
     }
 
     private boolean isPassiveMob(LivingEntity entity) {
