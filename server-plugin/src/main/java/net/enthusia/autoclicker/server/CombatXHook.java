@@ -4,16 +4,38 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Locale;
+import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 
-final class CombatXHook {
+final class CombatXHook implements Listener {
+    private static final long RETRY_INTERVAL_NANOS = 30_000_000_000L;
     private static final String COMBAT_MANAGER_CLASS = "net.sparkomc.combatx.CombatManager";
     private static final String COMBAT_MANAGER_RESOURCE = "net/sparkomc/combatx/CombatManager.class";
+
+    private final LongSupplier nanoTime;
+    private final BooleanSupplier discovery;
+
+    CombatXHook() {
+        nanoTime = System::nanoTime;
+        discovery = () -> discover();
+    }
+
+    CombatXHook(LongSupplier nanoTime, BooleanSupplier discovery) {
+        this.nanoTime = nanoTime;
+        this.discovery = discovery;
+    }
 
     private EnthusiaServerAutoClickerPlugin owner;
     private Method isInCombatMethod;
     private boolean available;
+    private boolean attempted;
+    private long lastAttemptNanos;
     private boolean warnedUnavailable;
 
     boolean initialize(EnthusiaServerAutoClickerPlugin plugin) {
@@ -26,6 +48,27 @@ final class CombatXHook {
     }
 
     boolean refresh() {
+        invalidate();
+        return isAvailable();
+    }
+
+    void invalidate() {
+        available = false;
+        attempted = false;
+        isInCombatMethod = null;
+    }
+
+    @EventHandler
+    public void onPluginEnable(PluginEnableEvent event) {
+        invalidate();
+    }
+
+    @EventHandler
+    public void onPluginDisable(PluginDisableEvent event) {
+        invalidate();
+    }
+
+    private boolean discover() {
         if (available) {
             return true;
         }
@@ -51,7 +94,17 @@ final class CombatXHook {
     }
 
     boolean isAvailable() {
-        return available || refresh();
+        if (available) {
+            return true;
+        }
+        long now = nanoTime.getAsLong();
+        if (attempted && now - lastAttemptNanos < RETRY_INTERVAL_NANOS) {
+            return false;
+        }
+        attempted = true;
+        lastAttemptNanos = now;
+        available = discovery.getAsBoolean();
+        return available;
     }
 
     boolean isInCombat(Player player) {

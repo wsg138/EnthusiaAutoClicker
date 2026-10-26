@@ -46,6 +46,7 @@ public final class EnthusiaServerAutoClickerPlugin extends JavaPlugin {
 
         combatX = new CombatXHook();
         combatX.initialize(this);
+        getServer().getPluginManager().registerEvents(combatX, this);
 
         InternalCombatTracker internalCombatTracker = new InternalCombatTracker(this);
         service = new AutoClickService(this, combatX, internalCombatTracker);
